@@ -1,0 +1,92 @@
+{
+  "name": "@defra/grants-config-utils",
+  "version": "0.0.1",
+  "description": "NPM module for providing utils for publishing grants config",
+  "engines": {
+    "node": ">=24",
+    "npm": ">=11.10.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DEFRA/grants-config-utils.git"
+  },
+  "type": "module",
+  "scripts": {
+    "prepare": "husky",
+    "github:release": "npx cdp-github-release @defra/grants-config-utils",
+    "lint": "eslint --cache --cache-strategy content \"**/*.{cjs,js}\"",
+    "lint:fix": "npm run lint -- --fix",
+    "prettier": "prettier --check \"**/*.{cjs,js,json}\"",
+    "prettier:fix": "prettier --write \"**/*.{cjs,js,json}\"",
+    "publish:changed": "changeset publish",
+    "test": "TZ=UTC vitest run --coverage",
+    "version:changed": "changeset version",
+    "version:create": "changeset"
+  },
+  "author": "Defra Grants Platform Experience Team",
+  "main": "src/service/config-store-and-inform.js",
+  "exports": {
+    ".": "./src/service/config-store-and-inform.js",
+    "./s3-interactions": "./src/s3/s3-interactions.js",
+    "./config": "./src/config/config.js",
+    "./broker": "./src/broker/broker-auth-helper.js"
+  },
+  "license": "OGL-UK-3.0",
+  "bugs": {
+    "url": "https://github.com/DEFRA/grants-config-utils/issues"
+  },
+  "homepage": "https://github.com/DEFRA/grants-config-utils#readme",
+  "dependencies": {
+    "@aws-sdk/client-s3": "3.1047.0",
+    "convict": "6.2.5",
+    "convict-format-with-validator": "6.2.0"
+  },
+  "devDependencies": {
+    "@babel/core": "7.29.0",
+    "@babel/preset-env": "7.29.5",
+    "@changesets/changelog-github": "0.5.1",
+    "@changesets/cli": "2.29.6",
+    "@vitest/coverage-v8": "4.1.6",
+    "eslint": "9.39.4",
+    "eslint-config-prettier": "10.1.1",
+    "husky": "9.1.7",
+    "lint-staged": "16.4.0",
+    "neostandard": "0.13.0",
+    "prettier": "3.8.3",
+    "vitest": "4.1.6",
+    "vitest-fetch-mock": "0.4.5"
+  },
+  "release-it": {
+    "npm": {
+      "publish": false
+    },
+    "github": {
+      "release": true,
+      "releaseName": "Release ${version}",
+      "releaseNotes": "echo ''"
+    },
+    "git": {
+      "commitMessage": "Tagged @defra/grants-config-utils ${version}",
+      "tagName": "@defra/grants-config-utils-${version}",
+      "requireCleanWorkingDir": false,
+      "commitArgs": [
+        "--no-verify"
+      ]
+    }
+  },
+  "bin": {
+    "cdp-github-release": "ci/release-it.sh"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
+  }
+}

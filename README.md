@@ -7,15 +7,13 @@ NPM module for providing utils for publishing grants config
 ### Installation
 
 ```
-npm install --save @defra/grants=config-utils
+npm install --save @defra/grants-config-utils
 
 ```
-
 
 ## Making changes
 
 Refer to the [contributing documentation](CONTRIBUTING.md).
-
 
 ## Licence
 
