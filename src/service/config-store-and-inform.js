@@ -6,12 +6,11 @@ import { createApiHeadersForConfigBroker } from "../broker/broker-auth-helper.js
 const configsDirectory = "configurations";
 
 export const storeConfigVersionAndInformBroker = async (logger) => {
-  if (!configsDirectoryExists(configsDirectory, logger)) {
+  if (!configsDirectoryExists(logger)) {
     return;
   }
 
-  const configsAtServiceVersion =
-    constructConfigsAtServiceVersion(configsDirectory);
+  const configsAtServiceVersion = constructConfigsAtServiceVersion();
 
   if (await configNotAlreadyStored(configsAtServiceVersion, logger)) {
     await storeConfigAtServiceVersion(configsAtServiceVersion, logger);
@@ -23,20 +22,20 @@ export const storeConfigVersionAndInformBroker = async (logger) => {
   );
 };
 
-const configsDirectoryExists = (configsDirectory, logger) => {
-  const configsDirectoryExists =
+const configsDirectoryExists = (logger) => {
+  const directoryExists =
     existsSync(configsDirectory) && lstatSync(configsDirectory).isDirectory();
 
-  if (!configsDirectoryExists) {
+  if (!directoryExists) {
     logger.warn(
       `config folder '${configsDirectory}' not found, so performing the file upload`,
     );
   }
 
-  return configsDirectoryExists;
+  return directoryExists;
 };
 
-const constructConfigsAtServiceVersion = (configsDirectory) => {
+const constructConfigsAtServiceVersion = () => {
   const version = config.get("serviceVersion");
 
   // all top-level directories are considered separate grant configurations
@@ -45,38 +44,38 @@ const constructConfigsAtServiceVersion = (configsDirectory) => {
     .map((dirent) => dirent.name);
 
   // iterate each grant configuration, collecting: grant, version and files
-  return configDirs.map((config) => {
-    const files = readdirSync(`${configsDirectory}/${config}`, {
+  return configDirs.map((grant) => {
+    const files = readdirSync(`${configsDirectory}/${grant}`, {
       withFileTypes: true,
       recursive: true,
     })
       .filter((dirent) => dirent.isFile())
       .map((dirent) => {
-        const configPath = `${configsDirectory}/${config}`;
+        const configPath = `${configsDirectory}/${grant}`;
 
         const direntWithoutConfigPath = dirent.parentPath
           ? `${dirent.parentPath.replace(configPath, "")}/${dirent.name}`
           : `${dirent.name}`;
 
         const localPath = `${configPath}${direntWithoutConfigPath}`;
-        const s3Path = `${config}/${version}${direntWithoutConfigPath}`;
+        const s3Path = `${grant}/${version}${direntWithoutConfigPath}`;
         return [localPath, s3Path];
       });
 
-    return { grant: config, version, files };
+    return { grant, version, files };
   });
 };
 
-const configNotAlreadyStored = async (configsAtServiceVersion, logger) => {
+const configNotAlreadyStored = async (_configsAtServiceVersion, _logger) => {
   // Check if any configs have: $config/x.x.x/metadata.json
   return true;
 };
 
 const storeConfigAtServiceVersion = async (configsAtServiceVersion, logger) => {
   // upload all files across all grant configurations at once
-  const allConfigFiles = configsAtServiceVersion
-    .map((config) => config.files)
-    .flat();
+  const allConfigFiles = configsAtServiceVersion.flatMap(
+    (grant) => grant.files,
+  );
   for (const [localPath, s3Path] of allConfigFiles) {
     logger.info(`uploading '${s3Path}' to S3`);
     await uploadBlob(logger, s3Path, readFileSync(localPath, "utf8"));
@@ -116,7 +115,7 @@ const callReleaseConfigEndpoint = async (
   }
 
   const { grant, version, files } = configAtServiceVersion;
-  // files is and array of tuples, we only want the S3 paths here
+  // files is an array of tuples, we only want the S3 paths here
   const s3Paths = files.map(([_, s3Path]) => s3Path);
 
   const payload = {
@@ -137,13 +136,13 @@ const callReleaseConfigEndpoint = async (
       body: JSON.stringify(payload),
     });
 
-    if (!response.ok) {
-      logger.error(
-        `call to release config failed with status '${response.status}' and text '${response.statusText}'`,
-      );
-    } else {
+    if (response.ok) {
       logger.info(
         `successfully notified the config broker about '${grant}' at version '${version}'`,
+      );
+    } else {
+      logger.error(
+        `call to release config failed with status '${response.status}' and text '${response.statusText}'`,
       );
     }
   } catch (err) {
