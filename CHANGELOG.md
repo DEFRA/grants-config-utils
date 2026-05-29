@@ -1,5 +1,11 @@
 # @defra/grants-config-utils
 
+## 0.0.15
+
+### Patch Changes
+
+- [#20](https://github.com/DEFRA/grants-config-utils/pull/20) [`a99b614`](https://github.com/DEFRA/grants-config-utils/commit/a99b61405ec43c4371e066af342d29d3224708d5) Thanks [@aaroncarroll82](https://github.com/aaroncarroll82)! - Skips some check steps on bot raised PR
+
 ## 0.0.14
 
 ### Patch Changes
