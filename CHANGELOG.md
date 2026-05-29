@@ -1,5 +1,11 @@
 # @defra/grants-config-utils
 
+## 0.0.17
+
+### Patch Changes
+
+- [`afe8222`](https://github.com/DEFRA/grants-config-utils/commit/afe8222db7a2b7af3690cabdeb5d66423332aefe) Thanks [@aaroncarroll82](https://github.com/aaroncarroll82)! - Tweak trigger for pull request checks
+
 ## 0.0.16
 
 ### Patch Changes
