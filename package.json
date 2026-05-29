@@ -40,23 +40,23 @@
   },
   "homepage": "https://github.com/DEFRA/grants-config-utils#readme",
   "dependencies": {
-    "@aws-sdk/client-s3": "3.1047.0",
+    "@aws-sdk/client-s3": "3.1055.0",
     "convict": "6.2.5",
     "convict-format-with-validator": "6.2.0"
   },
   "devDependencies": {
-    "@babel/core": "7.29.0",
-    "@babel/preset-env": "7.29.5",
+    "@babel/core": "7.29.7",
+    "@babel/preset-env": "7.29.7",
     "@changesets/changelog-github": "0.7.0",
     "@changesets/cli": "2.31.0",
-    "@vitest/coverage-v8": "4.1.6",
+    "@vitest/coverage-v8": "4.1.7",
     "eslint": "9.39.4",
     "eslint-config-prettier": "10.1.1",
     "husky": "9.1.7",
     "lint-staged": "17.0.5",
     "neostandard": "0.13.0",
     "prettier": "3.8.3",
-    "vitest": "4.1.6",
+    "vitest": "4.1.7",
     "vitest-fetch-mock": "0.4.5"
   },
   "release-it": {
