@@ -1,5 +1,11 @@
 # @defra/grants-config-utils
 
+## 0.0.12
+
+### Patch Changes
+
+- [#15](https://github.com/DEFRA/grants-config-utils/pull/15) [`2172acd`](https://github.com/DEFRA/grants-config-utils/commit/2172acd0198efdc5df24e12b1f33d0ba24511427) Thanks [@aaroncarroll82](https://github.com/aaroncarroll82)! - Prevent sonarcloud interfering with release
+
 ## 0.0.11
 
 ### Patch Changes
