@@ -3,5 +3,5 @@ projectKey=DEFRA_grants-config-utils
 serverUrl=https://sonarcloud.io
 serverVersion=8.0.0.88736
 dashboardUrl=https://sonarcloud.io/dashboard?id=DEFRA_grants-config-utils&branch=main
-ceTaskId=AZ5ygy4oY6JbeDuiB89v
-ceTaskUrl=https://sonarcloud.io/api/ce/task?id=AZ5ygy4oY6JbeDuiB89v
+ceTaskId=AZ5yhzHuKl6Uh_D27KOm
+ceTaskUrl=https://sonarcloud.io/api/ce/task?id=AZ5yhzHuKl6Uh_D27KOm
