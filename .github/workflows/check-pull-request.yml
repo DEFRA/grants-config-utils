@@ -35,10 +35,12 @@ jobs:
         run: npm run prettier
 
       - name: Test
+        if: ${{ !startsWith(github.head_ref, 'changeset-release/') }}
         run: npm test
 
       - name: SonarCloud Scan
-        if: github.actor != 'dependabot[bot]'
+        if: github.actor != 'dependabot[bot]' &&
+          !startsWith(github.head_ref, 'changeset-release/')
         uses: SonarSource/sonarqube-scan-action@v8.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
