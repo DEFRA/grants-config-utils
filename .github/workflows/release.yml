@@ -35,7 +35,7 @@ jobs:
         run: npm test
 
       - name: SonarCloud Scan
-        if: github.actor != 'dependabot[bot]'
+        if: github.actor != 'dependabot[bot]' && github.actor != 'github-actions[bot]' && !contains(github.event.head_commit.message, 'Create new config version')
         uses: SonarSource/sonarqube-scan-action@v8.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
