@@ -8,6 +8,7 @@ on:
 permissions:
   contents: write
   packages: write
+  id-token: write  # Required for OIDC
 
 jobs:
   release:
@@ -41,6 +42,11 @@ jobs:
 
       - name: Version changed packages
         run: npm run version:changed
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish changed packages to npm
+        run: npm run publish:changed
 
       - name: Commit version bumps & push
         run: |
@@ -49,12 +55,8 @@ jobs:
           git add .
           git commit -m "Version package [skip ci]" || echo "No changes to commit"
           git push
+
       - name: Create Git tag & GitHub Release
         run: npm run github:release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Publish changed packages to npm
-        run: npm run publish:changed
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
