@@ -1,5 +1,11 @@
 # @defra/grants-config-utils
 
+## 0.0.14
+
+### Patch Changes
+
+- [`05f2ca6`](https://github.com/DEFRA/grants-config-utils/commit/05f2ca64700ee0f6dc7d791dcea080ae22168ef1) Thanks [@aaroncarroll82](https://github.com/aaroncarroll82)! - Invoke publish mechanism
+
 ## 0.0.13
 
 ### Patch Changes
