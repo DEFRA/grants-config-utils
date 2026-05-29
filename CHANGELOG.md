@@ -1,5 +1,11 @@
 # @defra/grants-config-utils
 
+## 0.0.6
+
+### Patch Changes
+
+- [#5](https://github.com/DEFRA/grants-config-utils/pull/5) [`8dce91a`](https://github.com/DEFRA/grants-config-utils/commit/8dce91af68ace1d17faefe01d0b315f19193c940) Thanks [@bendef-24](https://github.com/bendef-24)! - feat(GRAN-20): add config already published check
+
 ## 0.0.5
 
 ### Patch Changes

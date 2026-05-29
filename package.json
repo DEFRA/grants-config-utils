@@ -1,6 +1,6 @@
 {
   "name": "@defra/grants-config-utils",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "NPM module for providing utils for publishing grants config",
   "engines": {
     "node": ">=24",
