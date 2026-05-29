@@ -8,6 +8,7 @@ on:
 permissions:
   contents: write
   packages: write
+  pull-requests: write
   id-token: write  # Required for OIDC
 
 jobs:
@@ -40,23 +41,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      - name: Version changed packages
-        run: npm run version:changed
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set user
+        run: git config user.name github-actions[bot] && git config user.email github-actions[bot]@users.noreply.github.com
 
-      - name: Publish changed packages to npm
-        run: npm run publish:changed
-
-      - name: Commit version bumps & push
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add .
-          git commit -m "Version package [skip ci]" || echo "No changes to commit"
-          git push
-
-      - name: Create Git tag & GitHub Release
-        run: npm run github:release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Release Pull Request or Release
+        uses: changesets/action@v1
+        with:
+          commitMode: 'github-api'
+          publish: npm run github:release
+          commit: 'Create new config version'
+          title: 'Create new config version'

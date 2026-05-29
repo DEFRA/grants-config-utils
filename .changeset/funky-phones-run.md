@@ -2,4 +2,4 @@
 "@defra/grants-config-utils": patch
 ---
 
-build: bump
+build: Change to PR based mechanism
