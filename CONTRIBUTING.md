@@ -19,4 +19,6 @@ To make changes to this library, please follow the steps below:
 4. Push to branch, and create a pull request.
 5. Github actions will verify the build
 6. After review, merge the pull request.
-7. Github actions will automatically increment the version and publish to NPM.
+7. A second PR will be created by the release action.
+8. Merge this PR
+9. Github actions will automatically increment the version and publish to NPM.
