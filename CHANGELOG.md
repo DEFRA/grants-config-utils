@@ -1,5 +1,11 @@
 # @defra/grants-config-utils
 
+## 0.0.16
+
+### Patch Changes
+
+- [#22](https://github.com/DEFRA/grants-config-utils/pull/22) [`5e176da`](https://github.com/DEFRA/grants-config-utils/commit/5e176da89e1ba37dd419d719232eae247087d954) Thanks [@aaroncarroll82](https://github.com/aaroncarroll82)! - Allow check job to run on bot PR
+
 ## 0.0.15
 
 ### Patch Changes
