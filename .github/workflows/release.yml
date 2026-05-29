@@ -48,6 +48,6 @@ jobs:
         uses: changesets/action@v1
         with:
           commitMode: 'github-api'
-          publish: npm run publish:changed && npm run github:release
+          publish: npm run github:release
           commit: 'Create new config version'
           title: 'Create new config version'

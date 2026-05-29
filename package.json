@@ -16,7 +16,7 @@
   "type": "module",
   "scripts": {
     "prepare": "husky",
-    "github:release": "npx cdp-github-release @defra/grants-config-utils",
+    "github:release": "npm run publish:changed && npx cdp-github-release @defra/grants-config-utils",
     "lint": "eslint --cache --cache-strategy content \"**/*.{cjs,js}\"",
     "lint:fix": "npm run lint -- --fix",
     "prettier": "prettier --check \"**/*.{cjs,js,json}\"",
