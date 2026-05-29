@@ -1,5 +1,11 @@
 # @defra/grants-config-utils
 
+## 0.0.10
+
+### Patch Changes
+
+- [#8](https://github.com/DEFRA/grants-config-utils/pull/8) [`d6f369e`](https://github.com/DEFRA/grants-config-utils/commit/d6f369ebc4c4815f57b9ce07eff455d66b3cbf42) Thanks [@aaroncarroll82](https://github.com/aaroncarroll82)! - build: Change to PR based mechanism
+
 ## 0.0.6
 
 ### Patch Changes
