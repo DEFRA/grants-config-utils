@@ -1,5 +1,11 @@
 # @defra/grants-config-utils
 
+## 0.0.13
+
+### Patch Changes
+
+- [#17](https://github.com/DEFRA/grants-config-utils/pull/17) [`91e030a`](https://github.com/DEFRA/grants-config-utils/commit/91e030ac2834ac0d4ae8c8b56f95f20048a8840a) Thanks [@aaroncarroll82](https://github.com/aaroncarroll82)! - Ensure npm publish happens too
+
 ## 0.0.12
 
 ### Patch Changes
