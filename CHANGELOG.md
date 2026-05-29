@@ -1,5 +1,11 @@
 # @defra/grants-config-utils
 
+## 0.0.5
+
+### Patch Changes
+
+- [#7](https://github.com/DEFRA/grants-config-utils/pull/7) [`c9dd9db`](https://github.com/DEFRA/grants-config-utils/commit/c9dd9db4bb2e1f08cdcf042cb0c35a4f08224454) Thanks [@aaroncarroll82](https://github.com/aaroncarroll82)! - docs: Update documentation
+
 ## 0.0.4
 
 ### Patch Changes
