@@ -1,5 +1,11 @@
 # @defra/grants-config-utils
 
+## 0.1.2
+
+### Patch Changes
+
+- c6fc2ef: fix: Skips auto merge stage on second run through
+
 ## 0.1.1
 
 ### Patch Changes
