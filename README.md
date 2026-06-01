@@ -15,6 +15,19 @@ npm install --save @defra/grants-config-utils
 
 Refer to the [contributing documentation](CONTRIBUTING.md).
 
+## Environment Variables
+
+The following variables are used in this module:
+
+- `SERVICE_VERSION` - **Required** This is the CDP service version that should be injected automatically in all consuming services
+- `AWS_REGION` - **Required** Region where the service is deployed
+- `CONFIG_BUCKET_NAME` - **Required** The S3 bucket where the config is to be stored
+- `FORCE_PATH_STYLE` - Optional flag to force path style URLs when using S3 bucket (default true)
+- `AWS_ENDPOINT_URL` - Optional AWS endpoint URL for local development
+- `GRANTS_CONFIG_BROKER_AUTH_TOKEN` - **Required** Auth token for the grants config broker API
+- `GRANTS_CONFIG_BROKER_ENCRYPTION_KEY` - **Required** Encryption key for the grants config broker API
+- `GRANTS_CONFIG_BROKER_API_ENDPOINT` - **Required** Endpoint for the grants config broker API
+
 ## Licence
 
 THIS INFORMATION IS LICENSED UNDER THE CONDITIONS OF THE OPEN GOVERNMENT LICENCE found at:
