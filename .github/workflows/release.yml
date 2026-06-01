@@ -5,6 +5,11 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      commit_message:
+        description: 'commit message'
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -97,6 +102,9 @@ jobs:
               ref: 'main',
               headers: {
                 'X-GitHub-Api-Version': '2022-11-28'
+              },
+              inputs: {
+                commit_message: 'Create new config version'
               }
             });
 
