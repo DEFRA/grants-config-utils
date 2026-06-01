@@ -1,5 +1,11 @@
 # @defra/grants-config-utils
 
+## 0.1.1
+
+### Patch Changes
+
+- 14d57a2: Allow auto merge of release PR
+
 ## 0.1.0
 
 ### Minor Changes
