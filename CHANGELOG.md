@@ -1,6 +1,6 @@
 # @defra/grants-config-utils
 
-## pre-0.0.16
+## pre-0.0.17
 
 ### Changes
 
