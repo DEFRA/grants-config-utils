@@ -31,6 +31,7 @@
   "exports": {
     ".": "./src/service/config-store-and-inform.js",
     "./s3-interactions": "./src/s3/s3-interactions.js",
+    "./sns-client": "./src/sns/sns-client.js",
     "./config": "./src/config/config.js",
     "./broker": "./src/broker/broker-auth-helper.js"
   },
@@ -41,6 +42,7 @@
   "homepage": "https://github.com/DEFRA/grants-config-utils#readme",
   "dependencies": {
     "@aws-sdk/client-s3": "3.1047.0",
+    "@aws-sdk/client-sns": "3.1047.0",
     "convict": "6.2.5",
     "convict-format-with-validator": "6.2.0"
   },

@@ -39,6 +39,14 @@ export const config = convict({
         env: "FORCE_PATH_STYLE",
       },
     },
+    sns: {
+      configVersionTopicArn: {
+        doc: "ARN of the SNS topic to publish new config version events",
+        format: String,
+        default: "arn:aws:sns:eu-west-2:000000000000:gfr__sns___config_version",
+        env: "GFR__SNS__CONFIG_VERSION_ARN",
+      },
+    },
   },
   configBroker: {
     auth: {
