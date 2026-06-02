@@ -1,5 +1,11 @@
 # @defra/grants-config-utils
 
+## 0.2.0
+
+### Minor Changes
+
+- dabf7f1: feat: Add SNS client
+
 ## 0.1.2
 
 ### Patch Changes
