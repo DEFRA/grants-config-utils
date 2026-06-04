@@ -63,7 +63,7 @@ jobs:
 
       - name: Trigger required checks on release PR, then merge to main, and delete release branch
         if: ${{ !startsWith(github.event_name == 'push' && github.event.head_commit.message || inputs.commit_message, 'Create new config version') }}
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const prNumber = Number("${{ steps.changesets.outputs.pullRequestNumber }}");
