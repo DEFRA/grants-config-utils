@@ -15,27 +15,6 @@ vi.mock("node:fs", () => ({
   readFileSync: vi.fn(() => "file-content"),
 }));
 
-// vi.mock("../config/config.js", () => ({
-//   config: {
-//     get: (key) => {
-//       const values = {
-//         serviceVersion: "1.2.3",
-//         serviceName: "grants-config-playground",
-//         "configBroker.apiEndpoint": "https://broker.unit.test",
-//         "configPublish.status": "active",
-//         "aws.sns.configVersionTopicArn": "arn:aws:sns:us-east-1:123456789012:config-version-topic",
-//       };
-//       return values[key];
-//     },
-//     default: (key) => {
-//       const values = {
-//         "aws.sns.configVersionTopicArn": "default-topic",
-//       };
-//       return values[key];
-//     }
-//   },
-// }));
-
 vi.mock("../s3/s3-interactions.js", () => ({
   listFiles: vi.fn(() => []),
   uploadBlob: vi.fn(),
