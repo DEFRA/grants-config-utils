@@ -24,6 +24,16 @@ The following variables are used in this module:
 - `CONFIG_BUCKET_NAME` - **Required** The S3 bucket where the config is to be stored
 - `FORCE_PATH_STYLE` - Optional flag to force path style URLs when using S3 bucket (default true)
 - `AWS_ENDPOINT_URL` - Optional AWS endpoint URL for local development
+- `GRANTS_CONFIG_PUBLISH_STATUS` - Optional override for status used on publish of config versions (default 'active')
+
+Depending on which mechanism is used to publish config versions, the following environment variables may be required:
+
+**To publish asynchronously via SNS (Recommended)**
+
+- `GFR__SNS__CONFIG_VERSION_ARN` - **Required** ARN of the SNS topic to publish config version events to
+
+**To publish synchronously via REST API**
+
 - `GRANTS_CONFIG_BROKER_AUTH_TOKEN` - **Required** Auth token for the grants config broker API
 - `GRANTS_CONFIG_BROKER_ENCRYPTION_KEY` - **Required** Encryption key for the grants config broker API
 - `GRANTS_CONFIG_BROKER_API_ENDPOINT` - **Required** Endpoint for the grants config broker API
