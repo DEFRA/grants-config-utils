@@ -2,6 +2,11 @@ import { readFileSync, existsSync, lstatSync, readdirSync } from "node:fs";
 import { config } from "../config/config.js";
 import { listFiles, uploadBlob } from "../s3/s3-interactions.js";
 import { createApiHeadersForConfigBroker } from "../broker/broker-auth-helper.js";
+import {
+  isClientSetup,
+  publishMessage,
+  setupClient,
+} from "../sns/sns-client.js";
 
 const configsDirectory = "configurations";
 
@@ -101,11 +106,13 @@ const notifyConfigBrokerServiceVersionAvailable = async (
   logger,
 ) => {
   const configBrokerEndpoint = config.get("configBroker.apiEndpoint");
+  const configSNSTopic = config.get("aws.sns.configVersionTopicArn");
   const configPublishStatus = config.get("configPublish.status");
 
   // iterate each grant configuration, notify config available at current service version
   for (const configAtServiceVersion of configsAtServiceVersion) {
     await sendConfigMessageToBroker(
+      configSNSTopic,
       configBrokerEndpoint,
       configAtServiceVersion,
       configPublishStatus,
@@ -115,19 +122,12 @@ const notifyConfigBrokerServiceVersionAvailable = async (
 };
 
 const sendConfigMessageToBroker = async (
+  configSNSTopic,
   configBrokerEndpoint,
   configAtServiceVersion,
   configPublishStatus,
   logger,
 ) => {
-  // TODO BH check service topic set instead
-  if (!configBrokerEndpoint?.length) {
-    logger.warn(
-      `config broker endpoint not set, so skipping release config call`,
-    );
-    return;
-  }
-
   const { grant, version, files } = configAtServiceVersion;
   // files is an array of tuples, we only want the S3 paths here
   const s3Paths = files.map(([_, s3Path]) => s3Path);
@@ -138,6 +138,17 @@ const sendConfigMessageToBroker = async (
     files: s3Paths,
     status: configPublishStatus,
   };
+
+  if (setToUseSNS(configSNSTopic)) {
+    return sendViaSNS(payload, configSNSTopic, logger);
+  }
+
+  if (!configBrokerEndpoint?.length) {
+    logger.warn(
+      `config SNS topic not set, and config broker endpoint not set, so skipping release config call`,
+    );
+    return;
+  }
 
   const url = new URL(`/api/release-config`, configBrokerEndpoint);
   try {
@@ -162,4 +173,27 @@ const sendConfigMessageToBroker = async (
   } catch (err) {
     logger.error("call to release config failed", err);
   }
+};
+
+const sendViaSNS = async (payload, configSNSTopic, logger) => {
+  if (!isClientSetup()) {
+    setupClient(logger.child({}), {
+      region: config.get("aws.region"),
+      endpoint: config.get("aws.endpointUrl"),
+      publishToTopic: config.get("aws.sns.configVersionTopicArn"),
+    });
+  }
+
+  await publishMessage(payload);
+
+  logger.info(
+    `successfully notified the config broker about '${payload.grant}' at version '${payload.version}' via SNS`,
+  );
+};
+
+const setToUseSNS = (configSNSTopic) => {
+  return (
+    configSNSTopic &&
+    configSNSTopic !== config.default("aws.sns.configVersionTopicArn")
+  );
 };
