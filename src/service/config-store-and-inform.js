@@ -2,6 +2,7 @@ import { readFileSync, existsSync, lstatSync, readdirSync } from "node:fs";
 import { config } from "../config/config.js";
 import { listFiles, uploadBlob } from "../s3/s3-interactions.js";
 import { createApiHeadersForConfigBroker } from "../broker/broker-auth-helper.js";
+import { isClientSetup, publishMessage, setupClient } from '../sns/sns-client.js'
 
 const configsDirectory = "configurations";
 
@@ -101,22 +102,26 @@ const notifyConfigBrokerServiceVersionAvailable = async (
   logger,
 ) => {
   const configBrokerEndpoint = config.get("configBroker.apiEndpoint");
+  const configPublishStatus = config.get("configPublish.status");
 
   // iterate each grant configuration, notify config available at current service version
   for (const configAtServiceVersion of configsAtServiceVersion) {
-    await callReleaseConfigEndpoint(
+    await sendConfigMessageToBroker(
       configBrokerEndpoint,
       configAtServiceVersion,
+      configPublishStatus,
       logger,
     );
   }
 };
 
-const callReleaseConfigEndpoint = async (
+const sendConfigMessageToBroker = async (
   configBrokerEndpoint,
   configAtServiceVersion,
+  configPublishStatus,
   logger,
 ) => {
+  // TODO BH check service topic set instead
   if (!configBrokerEndpoint?.length) {
     logger.warn(
       `config broker endpoint not set, so skipping release config call`,
@@ -132,9 +137,20 @@ const callReleaseConfigEndpoint = async (
     grant,
     version,
     files: s3Paths,
-    status: "draft", // hardcode status for now
+    status: configPublishStatus,
   };
 
+  // if (!isClientSetup()) {
+  //   setupClient(logger.child({}), {
+  //     region: config.get('aws.region'),
+  //     endpoint: config.get('aws.endpointUrl'),
+  //     publishToTopic: config.get('aws.sns.configUpdateTopicArn')
+  //   })
+  // }
+  //
+  // const { manifest, versionMajor, versionMinor, versionPatch, ...rest } =
+  //     notifyDetails
+  // await publishMessage(manifest, rest)
   const url = new URL(`/api/release-config`, configBrokerEndpoint);
   try {
     const response = await fetch(url.href, {

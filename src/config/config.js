@@ -72,6 +72,14 @@ export const config = convict({
       env: "GRANTS_CONFIG_BROKER_API_ENDPOINT",
     },
   },
+  configPublish: {
+    status: {
+      doc: "Config publish status",
+      format: String,
+      default: "active",
+      env: "GRANTS_CONFIG_PUBLISH_STATUS",
+    },
+  },
 });
 
 config.validate({ allowed: "strict" });
