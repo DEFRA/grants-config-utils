@@ -101,22 +101,26 @@ const notifyConfigBrokerServiceVersionAvailable = async (
   logger,
 ) => {
   const configBrokerEndpoint = config.get("configBroker.apiEndpoint");
+  const configPublishStatus = config.get("configPublish.status");
 
   // iterate each grant configuration, notify config available at current service version
   for (const configAtServiceVersion of configsAtServiceVersion) {
-    await callReleaseConfigEndpoint(
+    await sendConfigMessageToBroker(
       configBrokerEndpoint,
       configAtServiceVersion,
+      configPublishStatus,
       logger,
     );
   }
 };
 
-const callReleaseConfigEndpoint = async (
+const sendConfigMessageToBroker = async (
   configBrokerEndpoint,
   configAtServiceVersion,
+  configPublishStatus,
   logger,
 ) => {
+  // TODO BH check service topic set instead
   if (!configBrokerEndpoint?.length) {
     logger.warn(
       `config broker endpoint not set, so skipping release config call`,
@@ -132,7 +136,7 @@ const callReleaseConfigEndpoint = async (
     grant,
     version,
     files: s3Paths,
-    status: "draft", // hardcode status for now
+    status: configPublishStatus,
   };
 
   const url = new URL(`/api/release-config`, configBrokerEndpoint);
