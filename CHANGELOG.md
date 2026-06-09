@@ -1,5 +1,11 @@
 # @defra/grants-config-utils
 
+## 0.2.1
+
+### Patch Changes
+
+- 512774f: Status defaults to active and is now configurable
+
 ## 0.2.0
 
 ### Minor Changes
