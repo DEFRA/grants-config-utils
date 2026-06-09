@@ -1,5 +1,14 @@
 # @defra/grants-config-utils
 
+## 0.3.0
+
+### Minor Changes
+
+- 3f948bf: feat(GRAN-8): Allow async contact with config-broker
+
+  Update actions versions
+  Add to pre-commit hook to ensure changeset added
+
 ## 0.2.1
 
 ### Patch Changes
