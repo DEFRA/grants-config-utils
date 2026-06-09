@@ -16,6 +16,7 @@ vi.mock("../config/config.js", () => ({
         serviceVersion: "1.2.3",
         serviceName: "grants-config-playground",
         "configBroker.apiEndpoint": "https://broker.unit.test",
+        "configPublish.status": "active",
       };
       return values[key];
     },
@@ -105,7 +106,22 @@ describe("storeConfigVersionAndInformBroker", () => {
     expect(listFiles).toHaveBeenCalledTimes(1);
     expect(readFileSync).toHaveBeenCalledTimes(1);
     expect(uploadBlob).toHaveBeenCalledTimes(1);
-    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(fetch).toHaveBeenCalledWith(
+      "https://broker.unit.test/api/release-config",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: "Bearer token",
+        },
+        body: JSON.stringify({
+          grant: "grant-1",
+          version: "1.2.3",
+          files: ["grant-1/1.2.3/main.json"],
+          status: "active",
+        }),
+      },
+    );
   });
 
   it("should not store or inform when already published by config broker", async () => {

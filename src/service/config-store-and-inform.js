@@ -2,7 +2,6 @@ import { readFileSync, existsSync, lstatSync, readdirSync } from "node:fs";
 import { config } from "../config/config.js";
 import { listFiles, uploadBlob } from "../s3/s3-interactions.js";
 import { createApiHeadersForConfigBroker } from "../broker/broker-auth-helper.js";
-import { isClientSetup, publishMessage, setupClient } from '../sns/sns-client.js'
 
 const configsDirectory = "configurations";
 
@@ -140,17 +139,6 @@ const sendConfigMessageToBroker = async (
     status: configPublishStatus,
   };
 
-  // if (!isClientSetup()) {
-  //   setupClient(logger.child({}), {
-  //     region: config.get('aws.region'),
-  //     endpoint: config.get('aws.endpointUrl'),
-  //     publishToTopic: config.get('aws.sns.configUpdateTopicArn')
-  //   })
-  // }
-  //
-  // const { manifest, versionMajor, versionMinor, versionPatch, ...rest } =
-  //     notifyDetails
-  // await publishMessage(manifest, rest)
   const url = new URL(`/api/release-config`, configBrokerEndpoint);
   try {
     const response = await fetch(url.href, {
