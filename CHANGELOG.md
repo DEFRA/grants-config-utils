@@ -1,5 +1,11 @@
 # @defra/grants-config-utils
 
+## 0.4.0
+
+### Minor Changes
+
+- 63ff163: GRAN-60 - Add user to release config call (hardcoded for now)
+
 ## 0.3.0
 
 ### Minor Changes
