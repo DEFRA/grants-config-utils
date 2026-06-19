@@ -132,11 +132,15 @@ const sendConfigMessageToBroker = async (
   // files is an array of tuples, we only want the S3 paths here
   const s3Paths = files.map(([_, s3Path]) => s3Path);
 
+  // When CDP is updated to inject user that did deployment of container, reference that injected variable from config here
+  const user = "system";
+
   const payload = {
     grant,
     version,
     files: s3Paths,
     status: configPublishStatus,
+    user,
   };
 
   if (setToUseSNS(configSNSTopic)) {

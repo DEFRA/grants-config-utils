@@ -131,6 +131,7 @@ describe("storeConfigVersionAndInformBroker", () => {
             version: "1.2.3",
             files: ["grant-1/1.2.3/main.json"],
             status: "active",
+            user: "system",
           }),
         },
       );
@@ -158,6 +159,7 @@ describe("storeConfigVersionAndInformBroker", () => {
         version: "1.2.3",
         files: ["grant-1/1.2.3/main.json"],
         status: "active",
+        user: "system",
       });
     });
 
