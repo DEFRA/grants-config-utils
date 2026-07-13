@@ -121,6 +121,44 @@ describe("publish", () => {
     });
   });
 
+  it("publishes a FIFO message to a topic with array message attributes", async () => {
+    const message = {
+      key: "value",
+    };
+
+    const send = vi.fn();
+
+    SNSClient.mockImplementation(function () {
+      return { send };
+    });
+
+    PublishCommand.mockImplementation(function (params) {
+      return params;
+    });
+    setupClient(mockLogger, {
+      region: "us-east-1",
+      awsEndpointUrl: "http://localhost:4566",
+      publishToTopic: topicArn,
+    });
+
+    await publishFIFOMessage(message, "MY_GROUP", "MY_DEDUPLICATION_ID", {
+      customAttribute: ["value1", "value2"],
+    });
+
+    expect(PublishCommand).toHaveBeenCalledWith({
+      TopicArn: topicArn,
+      Message: '{"key":"value"}',
+      MessageAttributes: {
+        customAttribute: {
+          DataType: "String.Array",
+          StringValue: '["value1","value2"]',
+        },
+      },
+      MessageGroupId: "MY_GROUP",
+      MessageDeduplicationId: "MY_DEDUPLICATION_ID",
+    });
+  });
+
   it("error thrown if missing FIFO attributes when sending FIFO message", async () => {
     const message = {
       key: "value",
@@ -190,6 +228,43 @@ describe("publish", () => {
         customAttribute: {
           DataType: "String",
           StringValue: "customValue",
+        },
+      },
+    });
+  });
+
+  it("publishes a message including custom message attribute with array value", async () => {
+    const message = {
+      key: "value",
+    };
+
+    const send = vi.fn();
+
+    SNSClient.mockImplementation(function () {
+      return { send };
+    });
+
+    PublishCommand.mockImplementation(function (params) {
+      return params;
+    });
+    setupClient(mockLogger, {
+      region: "us-east-1",
+      awsEndpointUrl: "http://localhost:4566",
+    });
+
+    await publishMessage(
+      message,
+      { customAttribute: ["value1", "value2"] },
+      "specialTopicArn",
+    );
+
+    expect(PublishCommand).toHaveBeenCalledWith({
+      TopicArn: "specialTopicArn",
+      Message: '{"key":"value"}',
+      MessageAttributes: {
+        customAttribute: {
+          DataType: "String.Array",
+          StringValue: '["value1","value2"]',
         },
       },
     });
