@@ -1,5 +1,11 @@
 # @defra/grants-config-utils
 
+## 0.5.0
+
+### Minor Changes
+
+- cbf6e0e: GRAN-65: Add facility to send FIFO SNS Messages
+
 ## 0.4.0
 
 ### Minor Changes
