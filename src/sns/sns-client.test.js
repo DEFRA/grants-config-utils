@@ -1,5 +1,10 @@
 import { PublishCommand, SNSClient } from "@aws-sdk/client-sns";
-import { isClientSetup, publishMessage, setupClient } from "./sns-client.js";
+import {
+  isClientSetup,
+  publishFIFOMessage,
+  publishMessage,
+  setupClient,
+} from "./sns-client.js";
 import { config } from "../config/config.js";
 
 vi.mock("./metrics.js");
@@ -73,6 +78,73 @@ describe("publish", () => {
       Message: '{"key":"value"}',
       MessageAttributes: {},
     });
+  });
+
+  it("publishes a FIFO message to a topic", async () => {
+    const message = {
+      key: "value",
+    };
+
+    const send = vi.fn();
+
+    SNSClient.mockImplementation(function () {
+      return { send };
+    });
+
+    PublishCommand.mockImplementation(function (params) {
+      return params;
+    });
+    setupClient(mockLogger, {
+      region: "us-east-1",
+      awsEndpointUrl: "http://localhost:4566",
+      publishToTopic: topicArn,
+    });
+
+    expect(isClientSetup()).toBe(true);
+
+    await publishFIFOMessage(message, "MY_GROUP", "MY_DEDUPLICATION_ID");
+
+    expect(PublishCommand).toHaveBeenCalledWith({
+      TopicArn: topicArn,
+      Message: '{"key":"value"}',
+      MessageAttributes: {},
+      MessageGroupId: "MY_GROUP",
+      MessageDeduplicationId: "MY_DEDUPLICATION_ID",
+    });
+
+    expect(send).toHaveBeenCalledWith({
+      TopicArn: topicArn,
+      Message: '{"key":"value"}',
+      MessageAttributes: {},
+      MessageGroupId: "MY_GROUP",
+      MessageDeduplicationId: "MY_DEDUPLICATION_ID",
+    });
+  });
+
+  it("error thrown if missing FIFO attributes when sending FIFO message", async () => {
+    const message = {
+      key: "value",
+    };
+
+    const send = vi.fn();
+
+    SNSClient.mockImplementation(function () {
+      return { send };
+    });
+
+    setupClient(mockLogger, {
+      region: "us-east-1",
+      awsEndpointUrl: "http://localhost:4566",
+      publishToTopic: topicArn,
+    });
+
+    await expect(publishFIFOMessage(message)).rejects.toThrow(
+      "SNS client cannot be used to send FIFO messages without both groupId and groupDeduplicationId.",
+    );
+
+    expect(PublishCommand).toHaveBeenCalledTimes(0);
+
+    expect(send).toHaveBeenCalledTimes(0);
   });
 
   it("publishes a message including custom message attribute", async () => {
