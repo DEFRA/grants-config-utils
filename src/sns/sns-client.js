@@ -46,6 +46,37 @@ export const publishMessage = async (
   );
 };
 
+export const publishFIFOMessage = async (
+  data,
+  groupId,
+  groupDeduplicationId,
+  messageAttributes = {},
+  topic = defaultTopic,
+) => {
+  if (!clientSetup) {
+    throw new Error(
+      "SNS client not setup. Call setupClient() before publishing messages.",
+    );
+  }
+  if (!groupId || !groupDeduplicationId) {
+    throw new Error(
+      "SNS client cannot be used to send FIFO messages without both groupId and groupDeduplicationId.",
+    );
+  }
+  loggerInstance.info(
+    `Publish FIFO notification to ${topic} for groupId ${groupId} and groupDeduplicationId ${groupDeduplicationId}`,
+  );
+  await snsClient.send(
+    new PublishCommand({
+      TopicArn: topic,
+      Message: JSON.stringify(data),
+      MessageAttributes: convertMessageAttributes(messageAttributes),
+      MessageGroupId: groupId,
+      MessageDeduplicationId: groupDeduplicationId,
+    }),
+  );
+};
+
 /* Converts a simple key-value object into the format required by SNS for message attributes.
   Note only supports string values currently
  Example input: { key1: "value1", key2: "value2" }
