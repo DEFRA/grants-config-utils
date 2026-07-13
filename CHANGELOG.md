@@ -1,5 +1,11 @@
 # @defra/grants-config-utils
 
+## 0.6.0
+
+### Minor Changes
+
+- 988379b: Update `convertMessageAttributes` in `src/sns/sns-client.js` to support array of strings in message attributes.
+
 ## 0.5.0
 
 ### Minor Changes
