@@ -78,20 +78,28 @@ export const publishFIFOMessage = async (
 };
 
 /* Converts a simple key-value object into the format required by SNS for message attributes.
-  Note only supports string values currently
- Example input: { key1: "value1", key2: "value2" }
+  Note only supports string and array of strings values currently
+ Example input: { key1: "value1", key2: ["value2", "value3"] }
  Example output: {
    key1: { DataType: "String", StringValue: "value1" },
-   key2: { DataType: "String", StringValue: "value2" }
+   key2: { DataType: "String.Array", StringValue: '["value2","value3"]' }
  }
 */
 const convertMessageAttributes = (attributes) => {
   const convertedAttributes = {};
   for (const key in attributes) {
-    convertedAttributes[key] = {
-      DataType: "String",
-      StringValue: attributes[key],
-    };
+    const value = attributes[key];
+    if (Array.isArray(value)) {
+      convertedAttributes[key] = {
+        DataType: "String.Array",
+        StringValue: JSON.stringify(value),
+      };
+    } else {
+      convertedAttributes[key] = {
+        DataType: "String",
+        StringValue: value,
+      };
+    }
   }
   return convertedAttributes;
 };
