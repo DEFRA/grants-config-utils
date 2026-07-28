@@ -35,8 +35,7 @@
     "./config": "./src/config/config.js",
     "./broker": "./src/broker/broker-auth-helper.js",
     "./sts-client-plugin": "./src/sts/sts-client-plugin.js",
-    "./grants-config-broker-token": "./src/sts/grants-config-broker-token.js",
-    "./sts-plugin": "./src/sts/sts-client-plugin.js"
+    "./grants-config-broker-token": "./src/sts/grants-config-broker-token.js"
   },
   "license": "OGL-UK-3.0",
   "bugs": {
