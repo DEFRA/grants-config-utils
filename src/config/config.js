@@ -49,20 +49,18 @@ export const config = convict({
     },
   },
   configBroker: {
-    auth: {
-      token: {
-        doc: "Bearer token for service-to-service authentication",
+    serviceAuth: {
+      audience: {
+        doc: "JWT audience sent in the token request",
         format: String,
-        default: "",
-        env: "GRANTS_CONFIG_BROKER_AUTH_TOKEN",
-        sensitive: true,
+        default: "grants-config-broker",
+        env: "BACKEND_SERVICE_AUTH_AUDIENCE",
       },
-      encryptionKey: {
-        doc: "Encryption key for decrypting bearer token",
-        format: String,
-        default: "",
-        env: "GRANTS_CONFIG_BROKER_ENCRYPTION_KEY",
-        sensitive: true,
+      tokenDuration: {
+        doc: "Token lifetime in seconds (max 900)",
+        format: Number,
+        default: 60,
+        env: "BACKEND_SERVICE_AUTH_TOKEN_DURATION",
       },
     },
     apiEndpoint: {

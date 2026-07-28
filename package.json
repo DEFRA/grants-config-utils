@@ -33,7 +33,10 @@
     "./s3-interactions": "./src/s3/s3-interactions.js",
     "./sns-client": "./src/sns/sns-client.js",
     "./config": "./src/config/config.js",
-    "./broker": "./src/broker/broker-auth-helper.js"
+    "./broker": "./src/broker/broker-auth-helper.js",
+    "./sts-client-plugin": "./src/sts/sts-client-plugin.js",
+    "./grants-config-broker-token": "./src/sts/grants-config-broker-token.js",
+    "./sts-plugin": "./src/sts/sts-client-plugin.js"
   },
   "license": "OGL-UK-3.0",
   "bugs": {
@@ -43,6 +46,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "3.1091.0",
     "@aws-sdk/client-sns": "3.1091.0",
+    "@aws-sdk/client-sts": "3.1091.0",
     "convict": "6.2.5",
     "convict-format-with-validator": "6.2.0"
   },
@@ -52,7 +56,7 @@
     "@changesets/changelog-github": "0.7.0",
     "@changesets/cli": "2.31.1",
     "@vitest/coverage-v8": "4.1.10",
-    "eslint": "9.39.4",
+    "eslint": "10.7.0",
     "eslint-config-prettier": "10.1.1",
     "husky": "9.1.7",
     "lint-staged": "17.1.0",
@@ -60,6 +64,10 @@
     "prettier": "3.9.5",
     "vitest": "4.1.10",
     "vitest-fetch-mock": "0.4.5"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.8",
+    "eslint": "10.7.0"
   },
   "release-it": {
     "npm": {

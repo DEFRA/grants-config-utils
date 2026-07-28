@@ -27,3 +27,7 @@ Developers can add their own `AGENTS.local.md` and should be read as an addendum
 ## Testing Guidelines
 
 Add or update focused unit tests with shared utility changes. Run the relevant Vitest file, then `npm test`, `npm run lint`, and `npm run format:check`.
+
+## Command preference
+
+Use the `npm run` command whenever possible, and avoid `npx` where possible.
