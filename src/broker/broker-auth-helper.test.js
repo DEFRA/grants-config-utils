@@ -23,7 +23,7 @@ describe("Broker Auth Helper", () => {
       const baseHeaders = { "Content-Type": "application/json" };
 
       const headers = await createAuthenticatedHeaders(
-        mockStsClient,
+        { sts: mockStsClient },
         baseHeaders,
       );
 
@@ -38,7 +38,7 @@ describe("Broker Auth Helper", () => {
       const mockToken = "mock-sts-token";
       vi.mocked(generateToken).mockResolvedValue(mockToken);
 
-      const headers = await createAuthenticatedHeaders(mockStsClient);
+      const headers = await createAuthenticatedHeaders({ sts: mockStsClient });
 
       expect(headers).toEqual({
         Authorization: "Bearer mock-sts-token",
@@ -50,7 +50,7 @@ describe("Broker Auth Helper", () => {
       const baseHeaders = { "Content-Type": "application/json" };
 
       const headers = await createAuthenticatedHeaders(
-        mockStsClient,
+        { sts: mockStsClient },
         baseHeaders,
       );
 
@@ -68,7 +68,7 @@ describe("Broker Auth Helper", () => {
       };
 
       const headers = await createAuthenticatedHeaders(
-        mockStsClient,
+        { sts: mockStsClient },
         baseHeaders,
       );
 

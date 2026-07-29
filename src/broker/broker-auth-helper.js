@@ -14,7 +14,7 @@ export async function createAuthenticatedHeaders(
 ) {
   const headers = { ...baseHeaders };
 
-  const authCredentials = await generateToken(requestOrServer);
+  const authCredentials = await generateToken(requestOrServer.sts);
   headers.Authorization = `${AUTH_SCHEME} ${authCredentials}`;
 
   return headers;
