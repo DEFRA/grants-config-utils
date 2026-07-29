@@ -1,7 +1,6 @@
 import { readFileSync, existsSync, lstatSync, readdirSync } from "node:fs";
 import { config } from "../config/config.js";
 import { listFiles, uploadBlob } from "../s3/s3-interactions.js";
-import { createApiHeadersForConfigBroker } from "../broker/broker-auth-helper.js";
 import {
   isClientSetup,
   publishMessage,
@@ -105,7 +104,6 @@ const notifyConfigBrokerServiceVersionAvailable = async (
   configsAtServiceVersion,
   logger,
 ) => {
-  const configBrokerEndpoint = config.get("configBroker.apiEndpoint");
   const configSNSTopic = config.get("aws.sns.configVersionTopicArn");
   const configPublishStatus = config.get("configPublish.status");
 
@@ -113,7 +111,6 @@ const notifyConfigBrokerServiceVersionAvailable = async (
   for (const configAtServiceVersion of configsAtServiceVersion) {
     await sendConfigMessageToBroker(
       configSNSTopic,
-      configBrokerEndpoint,
       configAtServiceVersion,
       configPublishStatus,
       logger,
@@ -123,7 +120,6 @@ const notifyConfigBrokerServiceVersionAvailable = async (
 
 const sendConfigMessageToBroker = async (
   configSNSTopic,
-  configBrokerEndpoint,
   configAtServiceVersion,
   configPublishStatus,
   logger,
@@ -144,38 +140,9 @@ const sendConfigMessageToBroker = async (
   };
 
   if (setToUseSNS(configSNSTopic)) {
-    return sendViaSNS(payload, configSNSTopic, logger);
-  }
-
-  if (!configBrokerEndpoint?.length) {
-    logger.warn(
-      `config SNS topic not set, and config broker endpoint not set, so skipping release config call`,
-    );
-    return;
-  }
-
-  const url = new URL(`/api/release-config`, configBrokerEndpoint);
-  try {
-    const response = await fetch(url.href, {
-      method: "POST",
-      headers: {
-        ...createApiHeadersForConfigBroker(),
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (response.ok) {
-      logger.info(
-        `successfully notified the config broker about '${grant}' at version '${version}'`,
-      );
-    } else {
-      logger.error(
-        `call to release config failed with status '${response.status}' and text '${response.statusText}'`,
-      );
-    }
-  } catch (err) {
-    logger.error("call to release config failed", err);
+    await sendViaSNS(payload, configSNSTopic, logger);
+  } else {
+    logger.error(`config SNS topic not set, so cannot release config`);
   }
 };
 

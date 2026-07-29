@@ -20,12 +20,6 @@ vi.mock("../s3/s3-interactions.js", () => ({
   uploadBlob: vi.fn(),
 }));
 
-vi.mock("../broker/broker-auth-helper.js", () => ({
-  createApiHeadersForConfigBroker: vi.fn(() => ({
-    authorization: "Bearer token",
-  })),
-}));
-
 vi.mock("../sns/sns-client.js");
 
 const mockLogger = {
@@ -80,7 +74,6 @@ describe("storeConfigVersionAndInformBroker", () => {
     expect(listFiles).not.toHaveBeenCalled();
     expect(readFileSync).not.toHaveBeenCalled();
     expect(uploadBlob).not.toHaveBeenCalled();
-    expect(fetch).not.toHaveBeenCalled();
   });
 
   describe("when configurations exist", () => {
@@ -96,45 +89,6 @@ describe("storeConfigVersionAndInformBroker", () => {
             parentPath: "configurations/grant-1",
           },
         ]);
-    });
-
-    it("should store config and inform config broker via REST API if SNS not setup", async () => {
-      //reset topic to default, should indicate not setup
-      config.set(
-        "aws.sns.configVersionTopicArn",
-        config.default("aws.sns.configVersionTopicArn"),
-      );
-      await storeConfigVersionAndInformBroker(mockLogger);
-
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        "uploading 'grant-1/1.2.3/main.json' to S3",
-      );
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        "successfully uploaded '1' files across '1' configs",
-      );
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        "successfully notified the config broker about 'grant-1' at version '1.2.3'",
-      );
-      expect(listFiles).toHaveBeenCalledTimes(1);
-      expect(readFileSync).toHaveBeenCalledTimes(1);
-      expect(uploadBlob).toHaveBeenCalledTimes(1);
-      expect(fetch).toHaveBeenCalledWith(
-        "https://broker.unit.test/api/release-config",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            authorization: "Bearer token",
-          },
-          body: JSON.stringify({
-            grant: "grant-1",
-            version: "1.2.3",
-            files: ["grant-1/1.2.3/main.json"],
-            status: "active",
-            user: "system",
-          }),
-        },
-      );
     });
 
     it("should store config and inform config broker via SNS if setup", async () => {
@@ -171,35 +125,28 @@ describe("storeConfigVersionAndInformBroker", () => {
       expect(listFiles).toHaveBeenCalledTimes(1);
       expect(readFileSync).not.toHaveBeenCalled();
       expect(uploadBlob).not.toHaveBeenCalled();
-      expect(fetch).not.toHaveBeenCalled();
+      expect(publishMessage).not.toHaveBeenCalled();
     });
 
-    it("should stop and print warning if no mechanism setup to contact config-broker", async () => {
+    it("should stop and print error if no mechanism setup to contact config-broker", async () => {
       config.set(
         "aws.sns.configVersionTopicArn",
         config.default("aws.sns.configVersionTopicArn"),
       );
-      config.set("configBroker.apiEndpoint", "");
 
       await storeConfigVersionAndInformBroker(mockLogger);
 
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        "config SNS topic not set, and config broker endpoint not set, so skipping release config call",
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        "config SNS topic not set, so cannot release config",
       );
 
       expect(listFiles).toHaveBeenCalledTimes(1);
-      expect(fetch).not.toHaveBeenCalled();
       expect(isClientSetup).not.toHaveBeenCalled();
       expect(setupClient).not.toHaveBeenCalled();
       expect(publishMessage).not.toHaveBeenCalled();
     });
 
     it("should call config broker for each config (subdirectory) found in configurations folder", async () => {
-      //reset topic to default, should indicate not setup
-      config.set(
-        "aws.sns.configVersionTopicArn",
-        config.default("aws.sns.configVersionTopicArn"),
-      );
       readdirSync.mockRestore();
       readdirSync
         .mockReturnValueOnce([
@@ -241,15 +188,15 @@ describe("storeConfigVersionAndInformBroker", () => {
         "successfully uploaded '3' files across '2' configs",
       );
       expect(mockLogger.info).toHaveBeenCalledWith(
-        "successfully notified the config broker about 'grant-1' at version '1.2.3'",
+        "successfully notified the config broker about 'grant-1' at version '1.2.3' via SNS",
       );
       expect(mockLogger.info).toHaveBeenCalledWith(
-        "successfully notified the config broker about 'grant-2' at version '1.2.3'",
+        "successfully notified the config broker about 'grant-2' at version '1.2.3' via SNS",
       );
       expect(listFiles).toHaveBeenCalledTimes(2);
       expect(readFileSync).toHaveBeenCalledTimes(3);
       expect(uploadBlob).toHaveBeenCalledTimes(3);
-      expect(fetch).toHaveBeenCalledTimes(2);
+      expect(publishMessage).toHaveBeenCalledTimes(2);
     });
   });
 });
