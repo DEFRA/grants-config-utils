@@ -1,5 +1,14 @@
 # @defra/grants-config-utils
 
+## 1.0.0
+
+### Major Changes
+
+- 822c57c: BREAKING CHANGE:
+  Remove support for API key headers in config broker helpers.
+
+  Add support for using service auth with STS
+
 ## 0.6.0
 
 ### Minor Changes
