@@ -43,9 +43,9 @@
   },
   "homepage": "https://github.com/DEFRA/grants-config-utils#readme",
   "dependencies": {
-    "@aws-sdk/client-s3": "3.1091.0",
-    "@aws-sdk/client-sns": "3.1091.0",
-    "@aws-sdk/client-sts": "3.1091.0",
+    "@aws-sdk/client-s3": "3.1096.0",
+    "@aws-sdk/client-sns": "3.1096.0",
+    "@aws-sdk/client-sts": "3.1096.0",
     "convict": "6.2.5",
     "convict-format-with-validator": "6.2.0"
   },
@@ -58,9 +58,9 @@
     "eslint": "10.7.0",
     "eslint-config-prettier": "10.1.1",
     "husky": "9.1.7",
-    "lint-staged": "17.1.0",
+    "lint-staged": "17.2.0",
     "neostandard": "0.13.0",
-    "prettier": "3.9.5",
+    "prettier": "3.9.6",
     "vitest": "4.1.10",
     "vitest-fetch-mock": "0.4.5"
   },
