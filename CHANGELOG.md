@@ -1,5 +1,11 @@
 # @defra/grants-config-utils
 
+## 1.1.0
+
+### Minor Changes
+
+- 385953a: Add SQS subscriber. Provide deployer name for config publishes
+
 ## 1.0.0
 
 ### Major Changes
