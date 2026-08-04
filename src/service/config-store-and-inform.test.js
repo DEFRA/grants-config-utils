@@ -50,6 +50,7 @@ describe("storeConfigVersionAndInformBroker", () => {
     config.set("serviceName", "grants-config-playground");
     config.set("configBroker.apiEndpoint", "https://broker.unit.test");
     config.set("configPublish.status", "active");
+    config.set("configPublish.user", "tom_the_cat");
     config.set(
       "aws.sns.configVersionTopicArn",
       "arn:aws:sns:us-east-1:123456789012:config-version-topic",
@@ -113,7 +114,7 @@ describe("storeConfigVersionAndInformBroker", () => {
         version: "1.2.3",
         files: ["grant-1/1.2.3/main.json"],
         status: "active",
-        user: "system",
+        user: "tom_the_cat",
       });
     });
 

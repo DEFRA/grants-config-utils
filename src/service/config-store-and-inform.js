@@ -106,6 +106,7 @@ const notifyConfigBrokerServiceVersionAvailable = async (
 ) => {
   const configSNSTopic = config.get("aws.sns.configVersionTopicArn");
   const configPublishStatus = config.get("configPublish.status");
+  const configPublishUser = config.get("configPublish.user");
 
   // iterate each grant configuration, notify config available at current service version
   for (const configAtServiceVersion of configsAtServiceVersion) {
@@ -113,6 +114,7 @@ const notifyConfigBrokerServiceVersionAvailable = async (
       configSNSTopic,
       configAtServiceVersion,
       configPublishStatus,
+      configPublishUser,
       logger,
     );
   }
@@ -122,21 +124,19 @@ const sendConfigMessageToBroker = async (
   configSNSTopic,
   configAtServiceVersion,
   configPublishStatus,
+  configPublishUser,
   logger,
 ) => {
   const { grant, version, files } = configAtServiceVersion;
   // files is an array of tuples, we only want the S3 paths here
   const s3Paths = files.map(([_, s3Path]) => s3Path);
 
-  // When CDP is updated to inject user that did deployment of container, reference that injected variable from config here
-  const user = "system";
-
   const payload = {
     grant,
     version,
     files: s3Paths,
     status: configPublishStatus,
-    user,
+    user: configPublishUser,
   };
 
   if (setToUseSNS(configSNSTopic)) {

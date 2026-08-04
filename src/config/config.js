@@ -77,6 +77,12 @@ export const config = convict({
       default: "active",
       env: "GRANTS_CONFIG_PUBLISH_STATUS",
     },
+    user: {
+      doc: "Config published by user",
+      format: String,
+      default: "system",
+      env: "SERVICE_DEPLOYED_BY",
+    },
   },
 });
 
