@@ -33,6 +33,7 @@
     "./s3-interactions": "./src/s3/s3-interactions.js",
     "./sns-client": "./src/sns/sns-client.js",
     "./sqs-subscriber": "./src/sqs/sqs-subscriber.js",
+    "./trace-parent": "./src/sqs/trace-parent.js",
     "./config": "./src/config/config.js",
     "./broker": "./src/broker/broker-auth-helper.js",
     "./sts-client-plugin": "./src/sts/sts-client-plugin.js",
