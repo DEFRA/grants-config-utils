@@ -1,5 +1,11 @@
 # @defra/grants-config-utils
 
+## 1.1.1
+
+### Patch Changes
+
+- 435e2a9: Export trace parent
+
 ## 1.1.0
 
 ### Minor Changes
