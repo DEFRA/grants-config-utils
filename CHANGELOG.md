@@ -1,5 +1,11 @@
 # @defra/grants-config-utils
 
+## 1.2.0
+
+### Minor Changes
+
+- a4e8348: Allow external configuration of S3 client
+
 ## 1.1.2
 
 ### Patch Changes
