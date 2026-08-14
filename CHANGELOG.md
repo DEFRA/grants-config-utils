@@ -1,5 +1,11 @@
 # @defra/grants-config-utils
 
+## 1.1.2
+
+### Patch Changes
+
+- 6c8175e: Dependency updates only
+
 ## 1.1.1
 
 ### Patch Changes
