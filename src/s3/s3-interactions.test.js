@@ -1,21 +1,109 @@
-import { getBucketName, listFiles, uploadBlob } from "./s3-interactions.js";
 import { createS3Client } from "./s3-client.js";
-import { ListObjectsV2Command } from "@aws-sdk/client-s3";
+import { ListObjectsV2Command, PutObjectCommand } from "@aws-sdk/client-s3";
 
 vi.mock("./s3-client.js");
 
-const bucketName = "configs-bucket";
+const defaultBucketName = "configs-bucket";
 
 describe("s3-interactions", () => {
   const mockS3Client = { send: vi.fn() };
   const mockLogger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() };
+  let initialiseClient, listFiles, uploadBlob, getBucketName;
 
-  beforeEach(() => {
-    createS3Client.mockReturnValueOnce(mockS3Client);
+  beforeEach(async () => {
+    vi.resetModules();
+    vi.clearAllMocks();
+
+    createS3Client.mockReturnValue(mockS3Client);
+
+    const s3Interactions = await import("./s3-interactions.js");
+    initialiseClient = s3Interactions.initialiseClient;
+    listFiles = s3Interactions.listFiles;
+    uploadBlob = s3Interactions.uploadBlob;
+    getBucketName = s3Interactions.getBucketName;
   });
 
   afterEach(() => {
     vi.clearAllMocks();
+  });
+
+  describe("initialiseClient", () => {
+    it("should initialise S3 client with default config values when no options provided", () => {
+      const client = initialiseClient();
+
+      expect(createS3Client).toHaveBeenCalledWith({
+        region: "eu-west-2",
+        endpoint: null,
+        forcePathStyle: true,
+      });
+      expect(client).toBe(mockS3Client);
+      expect(getBucketName()).toBe(defaultBucketName);
+    });
+
+    it("should initialise S3 client with default config values when empty object provided", () => {
+      const client = initialiseClient({});
+
+      expect(createS3Client).toHaveBeenCalledWith({
+        region: "eu-west-2",
+        endpoint: null,
+        forcePathStyle: true,
+      });
+      expect(client).toBe(mockS3Client);
+      expect(getBucketName()).toBe(defaultBucketName);
+    });
+
+    it("should initialise S3 client with custom optional configuration options", () => {
+      const customOptions = {
+        region: "us-east-1",
+        endpoint: "http://localhost:4566",
+        forcePathStyle: false,
+        bucketNameOverride: "custom-bucket",
+      };
+
+      const client = initialiseClient(customOptions);
+
+      expect(createS3Client).toHaveBeenCalledWith({
+        region: "us-east-1",
+        endpoint: "http://localhost:4566",
+        forcePathStyle: false,
+      });
+      expect(client).toBe(mockS3Client);
+      expect(getBucketName()).toBe("custom-bucket");
+    });
+
+    it("should fallback omitted options to default config values when partial options provided", () => {
+      const partialOptions = {
+        region: "ap-southeast-1",
+        bucketNameOverride: "my-custom-bucket",
+      };
+
+      const client = initialiseClient(partialOptions);
+
+      expect(createS3Client).toHaveBeenCalledWith({
+        region: "ap-southeast-1",
+        endpoint: null,
+        forcePathStyle: true,
+      });
+      expect(client).toBe(mockS3Client);
+      expect(getBucketName()).toBe("my-custom-bucket");
+    });
+
+    it("should return the existing client on subsequent calls and not re-initialise", () => {
+      const client1 = initialiseClient({
+        region: "us-west-2",
+        bucketNameOverride: "initial-bucket",
+      });
+
+      const client2 = initialiseClient({
+        region: "eu-west-1",
+        bucketNameOverride: "second-bucket",
+      });
+
+      expect(createS3Client).toHaveBeenCalledTimes(1);
+      expect(client1).toBe(mockS3Client);
+      expect(client2).toBe(mockS3Client);
+      expect(getBucketName()).toBe("initial-bucket");
+    });
   });
 
   describe("listFiles", () => {
@@ -35,7 +123,7 @@ describe("s3-interactions", () => {
       expect(mockS3Client.send).toHaveBeenCalledWith(
         expect.objectContaining({
           input: {
-            Bucket: bucketName,
+            Bucket: defaultBucketName,
             Prefix: prefix,
           },
         }),
@@ -48,6 +136,29 @@ describe("s3-interactions", () => {
       expect(mockLogger.info).toHaveBeenCalledWith(
         `Found 2 files using prefix ${prefix}`,
       );
+    });
+
+    it("should list files using custom bucketNameOverride if initialised beforehand", async () => {
+      initialiseClient({ bucketNameOverride: "custom-list-bucket" });
+
+      const prefix = "custom-prefix";
+      const mockListResponse = {
+        Contents: [{ Key: "custom-prefix/doc.json" }],
+      };
+
+      mockS3Client.send.mockResolvedValueOnce(mockListResponse);
+
+      const result = await listFiles(mockLogger, prefix);
+
+      expect(mockS3Client.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          input: {
+            Bucket: "custom-list-bucket",
+            Prefix: prefix,
+          },
+        }),
+      );
+      expect(result).toEqual(mockListResponse.Contents);
     });
 
     it("should return an empty array if no files are found", async () => {
@@ -91,16 +202,42 @@ describe("s3-interactions", () => {
       expect(mockS3Client.send).toHaveBeenCalledWith(
         expect.objectContaining({
           input: {
-            Bucket: bucketName,
+            Bucket: defaultBucketName,
+            Key: key,
+            Body: body,
+          },
+        }),
+      );
+      expect(mockS3Client.send).toHaveBeenCalledWith(
+        expect.any(PutObjectCommand),
+      );
+      expect(result).toEqual(mockPutObjectResponse);
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        `Uploaded document: ${key}, ETag: ${mockPutObjectResponse.ETag}`,
+      );
+    });
+
+    it("should upload blob using custom bucketNameOverride if initialised beforehand", async () => {
+      initialiseClient({ bucketNameOverride: "custom-upload-bucket" });
+
+      const key = "test-custom-key";
+      const body = "test-custom-data";
+
+      const mockPutObjectResponse = { ETag: '"custom-etag"' };
+      mockS3Client.send.mockResolvedValueOnce(mockPutObjectResponse);
+
+      const result = await uploadBlob(mockLogger, key, body);
+
+      expect(mockS3Client.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          input: {
+            Bucket: "custom-upload-bucket",
             Key: key,
             Body: body,
           },
         }),
       );
       expect(result).toEqual(mockPutObjectResponse);
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        `Uploaded document: ${key}, ETag: ${mockPutObjectResponse.ETag}`,
-      );
     });
 
     it("should throw an error if the upload fails", async () => {
@@ -109,19 +246,15 @@ describe("s3-interactions", () => {
 
       const mockError = new Error("Upload failed");
       mockS3Client.send.mockRejectedValueOnce(mockError);
-      createS3Client.mockReturnValueOnce(mockS3Client);
-
-      mockS3Client.send.mockRejectedValueOnce(mockError);
 
       await expect(uploadBlob(mockLogger, key, body)).rejects.toThrow(
         "Upload failed",
       );
 
-      expect(createS3Client).not.toHaveBeenCalled();
       expect(mockS3Client.send).toHaveBeenCalledWith(
         expect.objectContaining({
           input: {
-            Bucket: bucketName,
+            Bucket: defaultBucketName,
             Key: key,
             Body: body,
           },
@@ -131,9 +264,21 @@ describe("s3-interactions", () => {
   });
 
   describe("getBucketName", () => {
-    it("should return the bucket name", async () => {
+    it("should return undefined before initialisation", () => {
+      const result = getBucketName();
+      expect(result).toBeUndefined();
+    });
+
+    it("should return the default bucket name after default initialisation", () => {
+      initialiseClient();
       const result = getBucketName();
       expect(result).toEqual("configs-bucket");
+    });
+
+    it("should return the overridden bucket name after custom initialisation", () => {
+      initialiseClient({ bucketNameOverride: "overridden-bucket-name" });
+      const result = getBucketName();
+      expect(result).toEqual("overridden-bucket-name");
     });
   });
 });

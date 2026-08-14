@@ -4,16 +4,23 @@ import { ListObjectsV2Command, PutObjectCommand } from "@aws-sdk/client-s3";
 
 let s3client;
 
-const bucketName = config.get("aws.s3.bucketName");
+let bucketName;
 
-const initialiseClient = () => {
+export const initialiseClient = ({
+  region,
+  endpoint,
+  forcePathStyle,
+  bucketNameOverride,
+} = {}) => {
   if (!s3client) {
     s3client = createS3Client({
-      region: config.get("aws.region"),
-      endpoint: config.get("aws.endpointUrl"),
-      forcePathStyle: config.get("aws.s3.forcePathStyle"),
+      region: region ?? config.get("aws.region"),
+      endpoint: endpoint ?? config.get("aws.endpointUrl"),
+      forcePathStyle: forcePathStyle ?? config.get("aws.s3.forcePathStyle"),
     });
+    bucketName = bucketNameOverride ?? config.get("aws.s3.bucketName");
   }
+
   return s3client;
 };
 
