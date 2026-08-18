@@ -104,7 +104,9 @@ export class SqsSubscriber {
   }
 
   extractMessageAttributes(message) {
-    const attributes = {};
+    const attributes = {
+      messageId: message.MessageId,
+    };
     for (const key in message.MessageAttributes) {
       if (Object.hasOwn(message.MessageAttributes, key)) {
         const attr = message.MessageAttributes[key];
