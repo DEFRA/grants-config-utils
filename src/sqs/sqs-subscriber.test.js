@@ -151,6 +151,7 @@ describe("message processing", () => {
         Attribute1: "Value1",
         Attribute2: "1",
         Attribute3: new TextEncoder().encode("Value3"),
+        messageId: "msg-1",
       },
       "1780599163000",
     );
