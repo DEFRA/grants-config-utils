@@ -1,5 +1,11 @@
 # @defra/grants-config-utils
 
+## 1.2.1
+
+### Patch Changes
+
+- 0842ad8: Include messageId in attributes for onMessage
+
 ## 1.2.0
 
 ### Minor Changes
