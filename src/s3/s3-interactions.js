@@ -1,6 +1,10 @@
 import { config } from "../config/config.js";
 import { createS3Client } from "./s3-client.js";
-import { ListObjectsV2Command, PutObjectCommand } from "@aws-sdk/client-s3";
+import {
+  ListObjectsV2Command,
+  paginateListObjectsV2,
+  PutObjectCommand,
+} from "@aws-sdk/client-s3";
 
 let s3client;
 
@@ -37,6 +41,23 @@ export const listFiles = async (logger, prefix) => {
   );
 
   return result.Contents ?? [];
+};
+
+export const listAllFiles = async (logger) => {
+  const client = initialiseClient();
+  const paginator = paginateListObjectsV2(
+    { client },
+    {
+      Bucket: bucketName,
+    },
+  );
+
+  const objectKeys = [];
+  for await (const { Contents } of paginator) {
+    objectKeys.push(...Contents.map((obj) => ({ Key: obj.Key })));
+  }
+  logger.info(`Found ${objectKeys.length ?? 0} files in bucket ${bucketName}`);
+  return objectKeys;
 };
 
 export const uploadBlob = async (logger, filename, contents) => {

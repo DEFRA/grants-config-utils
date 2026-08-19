@@ -1,14 +1,20 @@
 import { createS3Client } from "./s3-client.js";
-import { ListObjectsV2Command, PutObjectCommand } from "@aws-sdk/client-s3";
+import {
+  S3Client,
+  ListObjectsV2Command,
+  PutObjectCommand,
+} from "@aws-sdk/client-s3";
 
 vi.mock("./s3-client.js");
 
 const defaultBucketName = "configs-bucket";
 
 describe("s3-interactions", () => {
-  const mockS3Client = { send: vi.fn() };
+  const mockS3Client = Object.assign(Object.create(S3Client.prototype), {
+    send: vi.fn(),
+  });
   const mockLogger = { info: vi.fn(), warn: vi.fn(), error: vi.fn() };
-  let initialiseClient, listFiles, uploadBlob, getBucketName;
+  let initialiseClient, listFiles, listAllFiles, uploadBlob, getBucketName;
 
   beforeEach(async () => {
     vi.resetModules();
@@ -19,6 +25,7 @@ describe("s3-interactions", () => {
     const s3Interactions = await import("./s3-interactions.js");
     initialiseClient = s3Interactions.initialiseClient;
     listFiles = s3Interactions.listFiles;
+    listAllFiles = s3Interactions.listAllFiles;
     uploadBlob = s3Interactions.uploadBlob;
     getBucketName = s3Interactions.getBucketName;
   });
@@ -186,6 +193,115 @@ describe("s3-interactions", () => {
       await expect(listFiles(mockLogger, prefix)).rejects.toThrow(
         "List failed",
       );
+    });
+  });
+
+  describe("listAllFiles", () => {
+    it("should list all files in the bucket", async () => {
+      const mockListResponse = {
+        Contents: [{ Key: "file1.txt" }, { Key: "file2.txt" }],
+        IsTruncated: false,
+      };
+
+      mockS3Client.send.mockResolvedValueOnce(mockListResponse);
+
+      const result = await listAllFiles(mockLogger);
+
+      expect(mockS3Client.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          input: {
+            Bucket: defaultBucketName,
+          },
+        }),
+      );
+      expect(result).toEqual([{ Key: "file1.txt" }, { Key: "file2.txt" }]);
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        `Found 2 files in bucket ${defaultBucketName}`,
+      );
+    });
+
+    it("should paginate across multiple pages of files", async () => {
+      const page1 = {
+        Contents: [{ Key: "file1.txt" }],
+        IsTruncated: true,
+        NextContinuationToken: "token-page-2",
+      };
+      const page2 = {
+        Contents: [{ Key: "file2.txt" }, { Key: "file3.txt" }],
+        IsTruncated: false,
+      };
+
+      mockS3Client.send
+        .mockResolvedValueOnce(page1)
+        .mockResolvedValueOnce(page2);
+
+      const result = await listAllFiles(mockLogger);
+
+      expect(mockS3Client.send).toHaveBeenCalledTimes(2);
+      expect(mockS3Client.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          input: expect.objectContaining({
+            Bucket: defaultBucketName,
+          }),
+        }),
+      );
+      expect(result).toEqual([
+        { Key: "file1.txt" },
+        { Key: "file2.txt" },
+        { Key: "file3.txt" },
+      ]);
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        `Found 3 files in bucket ${defaultBucketName}`,
+      );
+    });
+
+    it("should list all files using custom bucketNameOverride if initialised beforehand", async () => {
+      initialiseClient({ bucketNameOverride: "custom-list-all-bucket" });
+
+      const mockListResponse = {
+        Contents: [{ Key: "doc.json" }],
+        IsTruncated: false,
+      };
+
+      mockS3Client.send.mockResolvedValueOnce(mockListResponse);
+
+      const result = await listAllFiles(mockLogger);
+
+      expect(mockS3Client.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          input: {
+            Bucket: "custom-list-all-bucket",
+          },
+        }),
+      );
+      expect(result).toEqual([{ Key: "doc.json" }]);
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        "Found 1 files in bucket custom-list-all-bucket",
+      );
+    });
+
+    it("should return an empty array if bucket has no files", async () => {
+      const mockListResponse = {
+        Contents: [],
+        IsTruncated: false,
+      };
+
+      mockS3Client.send.mockResolvedValueOnce(mockListResponse);
+
+      const result = await listAllFiles(mockLogger);
+
+      expect(result).toEqual([]);
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        `Found 0 files in bucket ${defaultBucketName}`,
+      );
+    });
+
+    it("should throw an error if listing fails", async () => {
+      const mockError = new Error("List all failed");
+
+      mockS3Client.send.mockRejectedValueOnce(mockError);
+
+      await expect(listAllFiles(mockLogger)).rejects.toThrow("List all failed");
     });
   });
 
