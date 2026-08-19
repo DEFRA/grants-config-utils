@@ -1,5 +1,11 @@
 # @defra/grants-config-utils
 
+## 1.3.0
+
+### Minor Changes
+
+- 38fc923: Export s3 client. Add paginated list all files
+
 ## 1.2.1
 
 ### Patch Changes
