@@ -46,10 +46,10 @@
   },
   "homepage": "https://github.com/DEFRA/grants-config-utils#readme",
   "dependencies": {
-    "@aws-sdk/client-s3": "3.1102.0",
-    "@aws-sdk/client-sns": "3.1102.0",
-    "@aws-sdk/client-sqs": "3.1102.0",
-    "@aws-sdk/client-sts": "3.1102.0",
+    "@aws-sdk/client-s3": "3.1107.0",
+    "@aws-sdk/client-sns": "3.1107.0",
+    "@aws-sdk/client-sqs": "3.1107.0",
+    "@aws-sdk/client-sts": "3.1107.0",
     "brace-expansion": "5.0.9",
     "convict": "6.2.5",
     "convict-format-with-validator": "6.2.0"
