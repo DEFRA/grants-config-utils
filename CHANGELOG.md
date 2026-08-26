@@ -1,5 +1,11 @@
 # @defra/grants-config-utils
 
+## 1.3.1
+
+### Patch Changes
+
+- 6ad0254: Dependency updates and changesets major version upgrade
+
 ## 1.3.0
 
 ### Minor Changes
