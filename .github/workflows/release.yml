@@ -54,19 +54,18 @@ jobs:
 
       - name: Create Release Pull Request or Release
         id: changesets
-        uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d #v1.9.0
+        uses: changesets/action@8488615a623b1b9c987934bb89eae8af6a946ac1 #v2.1.1
         with:
-          commitMode: 'github-api'
-          publish: npm run github:release
-          commit: 'Create new config version'
-          title: 'Create new config version'
+          publish-script: npm run github:release
+          commit-message: 'Create new config version'
+          pr-title: 'Create new config version'
 
       - name: Trigger required checks on release PR, then merge to main, and delete release branch
         if: ${{ !startsWith(github.event_name == 'push' && github.event.head_commit.message || inputs.commit_message, 'Create new config version') }}
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 #v9.0.0
         with:
           script: |
-            const prNumber = Number("${{ steps.changesets.outputs.pullRequestNumber }}");
+            const prNumber = Number("${{ steps.changesets.outputs.pr-number }}");
             const { data: releasePR } = await github.rest.pulls.get({
               owner: context.repo.owner,
               repo: context.repo.repo,
