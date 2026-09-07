@@ -1,5 +1,11 @@
 # @defra/grants-config-utils
 
+## 1.4.0
+
+### Minor Changes
+
+- 6229239: Allow listing bucket files to accept a prefix. Fix bug when no files found, to not throw exception
+
 ## 1.3.2
 
 ### Patch Changes
