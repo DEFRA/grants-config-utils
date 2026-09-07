@@ -43,18 +43,19 @@ export const listFiles = async (logger, prefix) => {
   return result.Contents ?? [];
 };
 
-export const listAllFiles = async (logger) => {
+export const listAllFiles = async (logger, prefix) => {
   const client = initialiseClient();
-  const paginator = paginateListObjectsV2(
-    { client },
-    {
-      Bucket: bucketName,
-    },
-  );
+  const input = {
+    Bucket: bucketName,
+    ...(prefix && { Prefix: prefix }),
+  };
+  const paginator = paginateListObjectsV2({ client }, input);
 
   const objectKeys = [];
   for await (const { Contents } of paginator) {
-    objectKeys.push(...Contents.map((obj) => ({ Key: obj.Key })));
+    if (Contents) {
+      objectKeys.push(...Contents.map((obj) => ({ Key: obj.Key })));
+    }
   }
   logger.info(`Found ${objectKeys.length ?? 0} files in bucket ${bucketName}`);
   return objectKeys;

@@ -296,6 +296,74 @@ describe("s3-interactions", () => {
       );
     });
 
+    it("should return an empty array if Contents is undefined", async () => {
+      const mockListResponse = {
+        Contents: undefined,
+        IsTruncated: false,
+      };
+
+      mockS3Client.send.mockResolvedValueOnce(mockListResponse);
+
+      const result = await listAllFiles(mockLogger);
+
+      expect(result).toEqual([]);
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        `Found 0 files in bucket ${defaultBucketName}`,
+      );
+    });
+
+    it("should include Prefix in paginateListObjectsV2 call when prefix is provided", async () => {
+      const prefix = "configs/subfolder";
+      const mockListResponse = {
+        Contents: [{ Key: "configs/subfolder/file.json" }],
+        IsTruncated: false,
+      };
+
+      mockS3Client.send.mockResolvedValueOnce(mockListResponse);
+
+      const result = await listAllFiles(mockLogger, prefix);
+
+      expect(mockS3Client.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          input: {
+            Bucket: defaultBucketName,
+            Prefix: prefix,
+          },
+        }),
+      );
+      expect(result).toEqual([{ Key: "configs/subfolder/file.json" }]);
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        `Found 1 files in bucket ${defaultBucketName}`,
+      );
+    });
+
+    it("should not include Prefix in paginateListObjectsV2 call when prefix is not provided", async () => {
+      const mockListResponse = {
+        Contents: [{ Key: "file.json" }],
+        IsTruncated: false,
+      };
+
+      mockS3Client.send.mockResolvedValueOnce(mockListResponse);
+
+      const result = await listAllFiles(mockLogger);
+
+      expect(mockS3Client.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          input: {
+            Bucket: defaultBucketName,
+          },
+        }),
+      );
+      expect(mockS3Client.send).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          input: expect.objectContaining({
+            Prefix: expect.anything(),
+          }),
+        }),
+      );
+      expect(result).toEqual([{ Key: "file.json" }]);
+    });
+
     it("should throw an error if listing fails", async () => {
       const mockError = new Error("List all failed");
 
