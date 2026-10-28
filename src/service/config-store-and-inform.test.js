@@ -1,5 +1,6 @@
 import { storeConfigVersionAndInformBroker } from "./config-store-and-inform.js";
 import { readFileSync, existsSync, lstatSync, readdirSync } from "node:fs";
+import YAML from "yaml";
 import { listFiles, uploadBlob } from "../s3/s3-interactions.js";
 import {
   isClientSetup,
@@ -198,6 +199,38 @@ describe("storeConfigVersionAndInformBroker", () => {
       expect(readFileSync).toHaveBeenCalledTimes(3);
       expect(uploadBlob).toHaveBeenCalledTimes(3);
       expect(publishMessage).toHaveBeenCalledTimes(2);
+    });
+
+    it("should special-case allowlist.yaml files by adding internal only data (SBIs)", async () => {
+      const initialYaml = "perf-test:\n  sbis: []\n";
+      const perfTestSbiValue = "107593059,108633093,106700730";
+      const expectedSbis = ["107593059", "108633093", "106700730"];
+
+      config.set("allowlist.perfTestSBIs", perfTestSbiValue);
+
+      readFileSync.mockReturnValueOnce(initialYaml);
+      readdirSync.mockRestore();
+      readdirSync
+        .mockReturnValueOnce([{ name: "grant-1", isDirectory: () => true }])
+        .mockReturnValueOnce([
+          {
+            name: "allowlist.yaml",
+            isFile: () => true,
+            parentPath: "configurations/grant-1",
+          },
+        ]);
+
+      await storeConfigVersionAndInformBroker(mockLogger);
+
+      expect(uploadBlob).toHaveBeenCalledWith(
+        mockLogger,
+        "grant-1/1.2.3/allowlist.yaml",
+        expect.any(String),
+      );
+
+      const uploadedContent = uploadBlob.mock.calls[0][2];
+      const parsedContent = YAML.parse(uploadedContent);
+      expect(parsedContent["perf-test"].sbis).toEqual(expectedSbis);
     });
   });
 });
