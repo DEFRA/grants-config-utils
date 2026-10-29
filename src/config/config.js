@@ -84,6 +84,43 @@ export const config = convict({
       env: "SERVICE_DEPLOYED_BY",
     },
   },
+  allowlist: {
+    devSBIs: {
+      doc: "Comma separated SBIs for dev",
+      format: String,
+      nullable: true,
+      default: null,
+      env: "ALLOWLIST_DEV_SBI",
+    },
+    testSBIs: {
+      doc: "Comma separated SBIs for test",
+      format: String,
+      nullable: true,
+      default: null,
+      env: "ALLOWLIST_TEST_SBI",
+    },
+    perfTestSBIs: {
+      doc: "Comma separated SBIs for perf-test",
+      format: String,
+      nullable: true,
+      default: null,
+      env: "ALLOWLIST_PERF_TEST_SBI",
+    },
+    extTestSBIs: {
+      doc: "Comma separated SBIs for ext-test",
+      format: String,
+      nullable: true,
+      default: null,
+      env: "ALLOWLIST_EXT_TEST_SBI",
+    },
+    prodSBIs: {
+      doc: "Comma separated SBIs for prod",
+      format: String,
+      nullable: true,
+      default: null,
+      env: "ALLOWLIST_PROD_SBI",
+    },
+  },
 });
 
 config.validate({ allowed: "strict" });

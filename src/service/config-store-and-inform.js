@@ -1,4 +1,5 @@
 import { readFileSync, existsSync, lstatSync, readdirSync } from "node:fs";
+import YAML from "yaml";
 import { config } from "../config/config.js";
 import { listFiles, uploadBlob } from "../s3/s3-interactions.js";
 import {
@@ -92,12 +93,57 @@ const storeConfigAtServiceVersion = async (configsAtServiceVersion, logger) => {
   );
   for (const [localPath, s3Path] of allConfigFiles) {
     logger.info(`uploading '${s3Path}' to S3`);
-    await uploadBlob(logger, s3Path, readFileSync(localPath, "utf8"));
+    const contents = updateContentsWithInternalData(
+      localPath,
+      readFileSync(localPath, "utf8"),
+    );
+    await uploadBlob(logger, s3Path, contents);
   }
 
   logger.info(
     `successfully uploaded '${allConfigFiles.length}' files across '${configsAtServiceVersion.length}' configs`,
   );
+};
+
+const getAllowListFor = (configPath) => {
+  return (config.get(configPath) || "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+};
+
+const updateContentsWithInternalData = (localPath, contents) => {
+  // allowlist file
+  if (localPath.endsWith("allowlist.yaml")) {
+    const devSBIs = getAllowListFor("allowlist.devSBIs");
+    const testSBIs = getAllowListFor("allowlist.testSBIs");
+    const perfTestSBIs = getAllowListFor("allowlist.perfTestSBIs");
+    const extTestSBIs = getAllowListFor("allowlist.extTestSBIs");
+    const prodSBIs = getAllowListFor("allowlist.prodSBIs");
+
+    const allowlist = YAML.parse(contents);
+
+    if (allowlist["dev"]?.sbis && devSBIs.length > 0) {
+      allowlist["dev"].sbis = devSBIs;
+    }
+    if (allowlist["test"]?.sbis && testSBIs.length > 0) {
+      allowlist["test"].sbis = testSBIs;
+    }
+    if (allowlist["perf-test"]?.sbis && perfTestSBIs.length > 0) {
+      allowlist["perf-test"].sbis = perfTestSBIs;
+    }
+    if (allowlist["ext-test"]?.sbis && extTestSBIs.length > 0) {
+      allowlist["ext-test"].sbis = extTestSBIs;
+    }
+    if (allowlist["prod"]?.sbis && prodSBIs.length > 0) {
+      allowlist["prod"].sbis = prodSBIs;
+    }
+
+    return YAML.stringify(allowlist);
+  }
+
+  // no internal data to add, return original contents
+  return contents;
 };
 
 const notifyConfigBrokerServiceVersionAvailable = async (
