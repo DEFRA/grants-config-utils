@@ -1,5 +1,11 @@
 # @defra/grants-config-utils
 
+## 1.4.1
+
+### Patch Changes
+
+- 1100a38: Fix npm audit issues
+
 ## 1.4.0
 
 ### Minor Changes
