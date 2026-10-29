@@ -131,19 +131,19 @@ const updateContentsWithInternalData = (localPath, contents) => {
 
     const allowlist = YAML.parse(contents);
 
-    if (devSBIs.length > 0) {
+    if (allowlist["dev"]?.sbis && devSBIs.length > 0) {
       allowlist["dev"].sbis = devSBIs;
     }
-    if (testSBIs.length > 0) {
+    if (allowlist["test"]?.sbis && testSBIs.length > 0) {
       allowlist["test"].sbis = testSBIs;
     }
-    if (perfTestSBIs.length > 0) {
+    if (allowlist["perf-test"]?.sbis && perfTestSBIs.length > 0) {
       allowlist["perf-test"].sbis = perfTestSBIs;
     }
-    if (extTestSBIs.length > 0) {
+    if (allowlist["ext-test"]?.sbis && extTestSBIs.length > 0) {
       allowlist["ext-test"].sbis = extTestSBIs;
     }
-    if (prodSBIs.length > 0) {
+    if (allowlist["prod"]?.sbis && prodSBIs.length > 0) {
       allowlist["prod"].sbis = prodSBIs;
     }
 

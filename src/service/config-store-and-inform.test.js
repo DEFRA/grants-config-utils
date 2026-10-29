@@ -291,7 +291,7 @@ describe("storeConfigVersionAndInformBroker", () => {
       expect(parsedContent["test"].sbis).toEqual([]);
     });
 
-    it("should handle missing sections in allowlist.yaml by throwing error", async () => {
+    it("should handle missing sections in allowlist.yaml gracefully", async () => {
       const initialYaml = "dev:\n  sbis: []\n";
       // test section is missing in initialYaml
       config.set("allowlist.testSBIs", "123");
@@ -310,7 +310,65 @@ describe("storeConfigVersionAndInformBroker", () => {
 
       await expect(
         storeConfigVersionAndInformBroker(mockLogger),
-      ).rejects.toThrow();
+      ).resolves.not.toThrow();
     });
+
+    it("should not add dev.sbis if dev.allowAll=true and sbis is not present", async () => {
+      const initialYaml = "dev:\n  allowAll: true\n";
+      config.set("allowlist.devSBIs", "123, 456");
+
+      readFileSync.mockReturnValueOnce(initialYaml);
+      readdirSync.mockRestore();
+      readdirSync
+        .mockReturnValueOnce([{ name: "grant-1", isDirectory: () => true }])
+        .mockReturnValueOnce([
+          {
+            name: "allowlist.yaml",
+            isFile: () => true,
+            parentPath: "configurations/grant-1",
+          },
+        ]);
+
+      await storeConfigVersionAndInformBroker(mockLogger);
+
+      const uploadedContent = uploadBlob.mock.calls[0][2];
+      const parsedContent = YAML.parse(uploadedContent);
+
+      expect(parsedContent["dev"].allowAll).toBe(true);
+      expect(parsedContent["dev"].sbis).toBeUndefined();
+    });
+
+    it.each([
+      ["test", "allowlist.testSBIs"],
+      ["perf-test", "allowlist.perfTestSBIs"],
+      ["ext-test", "allowlist.extTestSBIs"],
+      ["prod", "allowlist.prodSBIs"],
+    ])(
+      "should not add %s.sbis if allowAll=true and sbis is not present",
+      async (env, configKey) => {
+        const initialYaml = `${env}:\n  allowAll: true\n`;
+        config.set(configKey, "123, 456");
+
+        readFileSync.mockReturnValueOnce(initialYaml);
+        readdirSync.mockRestore();
+        readdirSync
+          .mockReturnValueOnce([{ name: "grant-1", isDirectory: () => true }])
+          .mockReturnValueOnce([
+            {
+              name: "allowlist.yaml",
+              isFile: () => true,
+              parentPath: "configurations/grant-1",
+            },
+          ]);
+
+        await storeConfigVersionAndInformBroker(mockLogger);
+
+        const uploadedContent = uploadBlob.mock.calls[0][2];
+        const parsedContent = YAML.parse(uploadedContent);
+
+        expect(parsedContent[env].allowAll).toBe(true);
+        expect(parsedContent[env].sbis).toBeUndefined();
+      },
+    );
   });
 });
