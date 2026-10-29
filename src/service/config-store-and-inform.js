@@ -105,29 +105,21 @@ const storeConfigAtServiceVersion = async (configsAtServiceVersion, logger) => {
   );
 };
 
+const getAllowListFor = (configPath) => {
+  return (config.get(configPath) || "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+};
+
 const updateContentsWithInternalData = (localPath, contents) => {
   // allowlist file
   if (localPath.endsWith("allowlist.yaml")) {
-    const devSBIs = (config.get("allowlist.devSBIs") || "")
-      .split(",")
-      .map((value) => value.trim())
-      .filter(Boolean);
-    const testSBIs = (config.get("allowlist.testSBIs") || "")
-      .split(",")
-      .map((value) => value.trim())
-      .filter(Boolean);
-    const perfTestSBIs = (config.get("allowlist.perfTestSBIs") || "")
-      .split(",")
-      .map((value) => value.trim())
-      .filter(Boolean);
-    const extTestSBIs = (config.get("allowlist.extTestSBIs") || "")
-      .split(",")
-      .map((value) => value.trim())
-      .filter(Boolean);
-    const prodSBIs = (config.get("allowlist.prodSBIs") || "")
-      .split(",")
-      .map((value) => value.trim())
-      .filter(Boolean);
+    const devSBIs = getAllowListFor("allowlist.devSBIs");
+    const testSBIs = getAllowListFor("allowlist.testSBIs");
+    const perfTestSBIs = getAllowListFor("allowlist.perfTestSBIs");
+    const extTestSBIs = getAllowListFor("allowlist.extTestSBIs");
+    const prodSBIs = getAllowListFor("allowlist.prodSBIs");
 
     const allowlist = YAML.parse(contents);
 
