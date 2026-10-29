@@ -1,5 +1,11 @@
 # @defra/grants-config-utils
 
+## 1.5.0
+
+### Minor Changes
+
+- bc3fde6: Allow external allowlist
+
 ## 1.4.1
 
 ### Patch Changes
