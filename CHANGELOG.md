@@ -1,5 +1,11 @@
 # @defra/grants-config-utils
 
+## 1.5.1
+
+### Patch Changes
+
+- 04e9653: Updated latest secure version of node
+
 ## 1.5.0
 
 ### Minor Changes
