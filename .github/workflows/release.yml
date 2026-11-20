@@ -61,18 +61,18 @@ jobs:
           pr-title: 'Create new config version'
 
       - name: Trigger required checks on release PR, then merge to main, and delete release branch
-        if: ${{ !startsWith(github.event_name == 'push' && github.event.head_commit.message || inputs.commit_message, 'Create new config version') }}
+        if: ${{ steps.changesets.outputs.pr-number != '' && !startsWith(github.event_name == 'push' && github.event.head_commit.message || inputs.commit_message, 'Create new config version') }}
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 #v9.0.0
         with:
           script: |
             const prNumber = Number("${{ steps.changesets.outputs.pr-number }}");
+            if (!prNumber) return;
+
             const { data: releasePR } = await github.rest.pulls.get({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: prNumber,
             });
-
-            if (!releasePR) return;
 
             await github.rest.checks.create({
               owner: context.repo.owner,
