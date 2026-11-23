@@ -61,10 +61,10 @@
     "@changesets/changelog-github": "1.0.1",
     "@changesets/cli": "3.0.3",
     "@vitest/coverage-v8": "4.1.12",
-    "eslint": "10.14.0",
+    "eslint": "10.15.0",
     "eslint-config-prettier": "10.1.8",
     "husky": "9.1.7",
-    "lint-staged": "17.6.0",
+    "lint-staged": "17.6.1",
     "neostandard": "0.14.1",
     "prettier": "3.10.1",
     "vitest": "5.1.0",
@@ -72,7 +72,7 @@
   },
   "overrides": {
     "brace-expansion": "5.0.13",
-    "eslint": "10.14.0"
+    "eslint": "10.15.0"
   },
   "release-it": {
     "npm": {
