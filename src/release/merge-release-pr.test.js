@@ -125,6 +125,28 @@ describe("mergeReleasePR", () => {
     );
   });
 
+  it("throws and skips dispatch if the PR never becomes mergeable", async () => {
+    const github = makeGithub({
+      getStates: [
+        { merged: false, mergeable: false, mergeable_state: "blocked" },
+      ],
+      mergeImpl: rejected(500, "merge should not be attempted"),
+    });
+
+    await expect(
+      mergeReleasePR({
+        github,
+        context,
+        core,
+        waitFor: noWait,
+        maxAttempts: 3,
+      }),
+    ).rejects.toThrow();
+    expect(github.rest.pulls.merge).not.toHaveBeenCalled();
+    expect(github.rest.actions.createWorkflowDispatch).not.toHaveBeenCalled();
+    expect(github.rest.git.deleteRef).not.toHaveBeenCalled();
+  });
+
   it("throws the last error and skips dispatch after exhausting attempts", async () => {
     const github = makeGithub({
       getStates: [

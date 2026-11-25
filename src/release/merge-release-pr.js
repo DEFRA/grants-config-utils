@@ -43,55 +43,29 @@ export const mergeReleasePR = async ({
 
   await createChecks(github, owner, repo, releasePR);
 
+  let merged = false;
   let lastError;
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+  for (let attempt = 1; attempt <= maxAttempts && !merged; attempt++) {
     await waitFor(SLEEP_TIME * attempt);
-
-    const { data: pr } = await github.rest.pulls.get({
+    const result = await attemptMerge(
+      github,
       owner,
       repo,
-      pull_number: releasePR.number,
-    });
-
-    if (pr.merged) {
-      lastError = null;
-      break;
-    }
-    if (pr.mergeable === null) {
-      continue; // still "unknown", GitHub is still computing mergeability
-    }
-    if (pr.mergeable === false) {
-      core.info(
-        `Attempt ${attempt}: mergeable_state=${pr.mergeable_state}, waiting`,
-      );
-      continue;
-    }
-
-    try {
-      await github.rest.pulls.merge({
-        owner,
-        repo,
-        pull_number: releasePR.number,
-        merge_method: "squash",
-      });
-      lastError = null;
-      break;
-    } catch (err) {
-      lastError = err;
-      if (
-        err.status === METHOD_NOT_ALLOWED &&
-        /already merged/i.test(err.message)
-      ) {
-        lastError = null;
-        break;
-      }
-      core.info(
-        `Attempt ${attempt}: merge rejected (${err.status}: ${err.message}), retrying`,
-      );
-    }
+      releasePR.number,
+      core,
+      attempt,
+    );
+    merged = result.merged;
+    lastError = result.error ?? lastError;
   }
-  if (lastError) {
-    throw lastError;
+
+  if (!merged) {
+    throw (
+      lastError ??
+      new Error(
+        `Release PR #${releasePR.number} did not become mergeable after ${maxAttempts} attempts`,
+      )
+    );
   }
 
   await github.rest.actions.createWorkflowDispatch({
@@ -115,9 +89,53 @@ export const mergeReleasePR = async ({
   });
 };
 
+/**
+ * One polling attempt to merge the PR
+ * @returns {Promise<{ merged: boolean, error?: Error }>}
+ */
+async function attemptMerge(github, owner, repo, pullNumber, core, attempt) {
+  const { data: pr } = await github.rest.pulls.get({
+    owner,
+    repo,
+    pull_number: pullNumber,
+  });
+
+  if (pr.merged) {
+    return { merged: true };
+  }
+  if (pr.mergeable !== true) {
+    // null = GitHub still computing mergeability; false = not mergeable yet
+    core.info(
+      `Attempt ${attempt}: mergeable_state=${pr.mergeable_state}, waiting`,
+    );
+    return { merged: false };
+  }
+
+  try {
+    await github.rest.pulls.merge({
+      owner,
+      repo,
+      pull_number: pullNumber,
+      merge_method: "squash",
+    });
+    return { merged: true };
+  } catch (err) {
+    if (
+      err.status === METHOD_NOT_ALLOWED &&
+      /already merged/i.test(err.message)
+    ) {
+      return { merged: true };
+    }
+    core.info(
+      `Attempt ${attempt}: merge rejected (${err.status}: ${err.message}), retrying`,
+    );
+    return { merged: false, error: err };
+  }
+}
+
 async function createChecks(github, owner, repo, releasePR) {
   for (const name of REQUIRED_CHECKS) {
-    await github.rest.checks.create({
+    github.rest.checks.create({
       owner,
       repo,
       name,
