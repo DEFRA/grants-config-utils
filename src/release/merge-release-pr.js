@@ -1,5 +1,7 @@
 const REQUIRED_CHECKS = ["validate-changeset-check", "Run Pull Request Checks"];
 
+const METHOD_NOT_ALLOWED = 405;
+const SLEEP_TIME = 5000;
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
@@ -39,24 +41,11 @@ export const mergeReleasePR = async ({
     return;
   }
 
-  for (const name of REQUIRED_CHECKS) {
-    await github.rest.checks.create({
-      owner,
-      repo,
-      name,
-      head_sha: releasePR.head.sha,
-      status: "completed",
-      conclusion: "success",
-      output: {
-        title: "Required check triggered",
-        summary: `Check created for PR #${releasePR.number}`,
-      },
-    });
-  }
+  await createChecks(github, owner, repo, releasePR);
 
   let lastError;
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    await waitFor(5000 * attempt);
+    await waitFor(SLEEP_TIME * attempt);
 
     const { data: pr } = await github.rest.pulls.get({
       owner,
@@ -89,7 +78,10 @@ export const mergeReleasePR = async ({
       break;
     } catch (err) {
       lastError = err;
-      if (err.status === 405 && /already merged/i.test(err.message)) {
+      if (
+        err.status === METHOD_NOT_ALLOWED &&
+        /already merged/i.test(err.message)
+      ) {
         lastError = null;
         break;
       }
@@ -122,3 +114,20 @@ export const mergeReleasePR = async ({
     ref: `heads/${releasePR.head.ref}`,
   });
 };
+
+async function createChecks(github, owner, repo, releasePR) {
+  for (const name of REQUIRED_CHECKS) {
+    await github.rest.checks.create({
+      owner,
+      repo,
+      name,
+      head_sha: releasePR.head.sha,
+      status: "completed",
+      conclusion: "success",
+      output: {
+        title: "Required check triggered",
+        summary: `Check created for PR #${releasePR.number}`,
+      },
+    });
+  }
+}
