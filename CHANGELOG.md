@@ -1,5 +1,11 @@
 # @defra/grants-config-utils
 
+## 1.6.0
+
+### Minor Changes
+
+- f29879e: Add `release/merge-release-pr` helper for config publish workflows.
+
 ## 1.5.1
 
 ### Patch Changes
