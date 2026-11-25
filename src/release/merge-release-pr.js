@@ -135,7 +135,7 @@ async function attemptMerge(github, owner, repo, pullNumber, core, attempt) {
 
 async function createChecks(github, owner, repo, releasePR) {
   for (const name of REQUIRED_CHECKS) {
-    github.rest.checks.create({
+    await github.rest.checks.create({
       owner,
       repo,
       name,
