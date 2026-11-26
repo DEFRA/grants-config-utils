@@ -42,7 +42,10 @@ describe("mergeReleasePR", () => {
   it("returns early without side effects if the release PR is not found", async () => {
     const github = {
       rest: {
-        pulls: { get: vi.fn(async () => ({ data: undefined })), merge: vi.fn() },
+        pulls: {
+          get: vi.fn(async () => ({ data: undefined })),
+          merge: vi.fn(),
+        },
         checks: { create: vi.fn() },
         actions: { createWorkflowDispatch: vi.fn() },
         git: { deleteRef: vi.fn() },
