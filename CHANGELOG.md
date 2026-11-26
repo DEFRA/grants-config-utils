@@ -1,5 +1,15 @@
 # @defra/grants-config-utils
 
+## 1.7.0
+
+### Minor Changes
+
+- 252b627: `mergeReleasePR` now accepts an optional `dispatch` argument
+  (`{ workflow_id, ref, inputs }`) to control the workflow triggered after the
+  merge. It defaults to the main publish flow (`publish.yml` on `main`), so
+  existing callers are unaffected; the hotfix flow passes `publish-hotfix.yml` on
+  the hotfix branch with a `description` input.
+
 ## 1.6.0
 
 ### Minor Changes
