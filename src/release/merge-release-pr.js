@@ -20,6 +20,9 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
  * @param {object}   args.core          Actions core (github-script `core`)
  * @param {Function} [args.waitFor]     Sleep fn, injectable for tests
  * @param {number}   [args.maxAttempts] Merge attempts before giving up
+ * @param {object}   [args.dispatch]    Workflow to dispatch after merge
+ *   ({ workflow_id, ref, inputs }); defaults to the main publish flow. The
+ *   hotfix flow passes publish-hotfix.yml on the hotfix branch.
  */
 export const mergeReleasePR = async ({
   github,
@@ -27,6 +30,7 @@ export const mergeReleasePR = async ({
   core,
   waitFor = sleep,
   maxAttempts = 10,
+  dispatch,
 }) => {
   const { owner, repo } = context.repo;
   const prNumber = Number(process.env.PR_NUMBER);
@@ -68,18 +72,24 @@ export const mergeReleasePR = async ({
     );
   }
 
-  await github.rest.actions.createWorkflowDispatch({
-    owner,
-    repo,
+  const target = dispatch ?? {
     workflow_id: "publish.yml",
     ref: "main",
-    headers: {
-      "X-GitHub-Api-Version": "2022-11-28",
-    },
     inputs: {
       run_name: process.env.RELEASE_MSG,
       commit_message: process.env.RELEASE_MSG,
     },
+  };
+
+  await github.rest.actions.createWorkflowDispatch({
+    owner,
+    repo,
+    workflow_id: target.workflow_id,
+    ref: target.ref,
+    headers: {
+      "X-GitHub-Api-Version": "2022-11-28",
+    },
+    inputs: target.inputs,
   });
 
   await github.rest.git.deleteRef({
