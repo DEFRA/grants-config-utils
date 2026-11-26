@@ -39,6 +39,24 @@ beforeEach(() => {
 });
 
 describe("mergeReleasePR", () => {
+  it("returns early without side effects if the release PR is not found", async () => {
+    const github = {
+      rest: {
+        pulls: { get: vi.fn(async () => ({ data: undefined })), merge: vi.fn() },
+        checks: { create: vi.fn() },
+        actions: { createWorkflowDispatch: vi.fn() },
+        git: { deleteRef: vi.fn() },
+      },
+    };
+
+    await mergeReleasePR({ github, context, core, waitFor: noWait });
+
+    expect(github.rest.checks.create).not.toHaveBeenCalled();
+    expect(github.rest.pulls.merge).not.toHaveBeenCalled();
+    expect(github.rest.actions.createWorkflowDispatch).not.toHaveBeenCalled();
+    expect(github.rest.git.deleteRef).not.toHaveBeenCalled();
+  });
+
   it("creates both required checks before merging", async () => {
     const github = makeGithub({
       getStates: [{ merged: false, mergeable: true }],
@@ -122,6 +140,23 @@ describe("mergeReleasePR", () => {
     );
     expect(github.rest.git.deleteRef).toHaveBeenCalledWith(
       expect.objectContaining({ ref: "heads/changeset-release/main" }),
+    );
+  });
+
+  it("dispatches a custom workflow when a dispatch override is given (hotfix)", async () => {
+    const github = makeGithub({
+      getStates: [{ merged: false, mergeable: true }],
+    });
+    const dispatch = {
+      workflow_id: "publish-hotfix.yml",
+      ref: "hotfix-urgent",
+      inputs: { description: "Create new hotfix config version #patch" },
+    };
+
+    await mergeReleasePR({ github, context, core, waitFor: noWait, dispatch });
+
+    expect(github.rest.actions.createWorkflowDispatch).toHaveBeenCalledWith(
+      expect.objectContaining(dispatch),
     );
   });
 
